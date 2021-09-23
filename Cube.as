@@ -3,7 +3,7 @@
 
 	public class Cube extends GameObject{
 
-		public function Cube(_positon:Point3d, _rotation:Point3d, _scale:Point3d ,_bd:BitmapData) {
+		public function Cube(_positon:Point3d, _rotation:Quaternion, _scale:Point3d ,_bd:BitmapData) {
 			// constructor code
 			position = _positon;//
 			rotation = _rotation;//;
@@ -41,8 +41,10 @@
 		}
 
 		override public function update(): void {
-			rotation.y += 0.01;
-			rotation.x += 0.01;
+			var MATH_DEG_TO_RAD:Number =  0.0174532925;
+			var moveVector:Point3d = new Point3d(0, -Engine.rotateSpeed *MATH_DEG_TO_RAD, 0);
+			var quat1:Quaternion = EngineMath.eulerToQuat( moveVector);
+			rotation = EngineMath.quatMul( rotation, quat1);
 		}
 
 		

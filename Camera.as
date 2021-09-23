@@ -11,18 +11,20 @@
 			down: false,
 			left: false,
 			right: false,
-			G: false,
-			H: false,
-			N: false,
-			B: false
+			W: false,
+			S: false,
+			A: false,
+			D: false,
+			E: false, 
+			Q: false
 		};
 		private var speed:Number = 0;
 		private var position:Point3d;
-		private var rotation:Point3d ;
+		private var rotation:Quaternion ;
 		private var currTime:Number;
 		private var prevTime:Number;
 		
-		public function Camera(_theStage:Stage, _position:Point3d, _rotation:Point3d) {
+		public function Camera(_theStage:Stage, _position:Point3d, _rotation:Quaternion) {
 			// constructor code
 			position = _position;
 			rotation = _rotation;
@@ -37,12 +39,136 @@
 			return position;
 		}
 		
-		public function getRotation():Point3d
+		public function getRotation():Quaternion
 		{
 			return rotation;
 		}
 		
-		function myKeyDown(e: KeyboardEvent): void {
+		
+		
+		public function update(): void {
+			
+			currTime = getTimer();
+			var elapsedTime:Number = currTime - prevTime;
+			var COS: Number;
+			var SIN: Number;
+			var MATH_DEG_TO_RAD:Number = 0.0174532925;
+			
+			//If you''re wondering how I got this, I derived it from quaternion to matrix conversion code. I took the matrix form and multiplied by the vectors (0,0,1) (0,1,0) and (1,0,0) to get these simplified forms.
+
+			//up vector
+			//position.x += 2 * (rotation.x*rotation.y - rotation.w*rotation.z)
+			//position.y += 1 - 2 * (rotation.x*rotation.x + rotation.z*rotation.z)
+			//position.z += 2 * (rotation.y*rotation.z + rotation.w*rotation.x)
+			
+			elapsedTime = 1;
+			
+			if (Model.W) {
+	
+				position.x += 2 * (rotation.x*rotation.z + rotation.w*rotation.y);
+				position.y += 2 * (rotation.y*rotation.z - rotation.w*rotation.x);
+				position.z += 1 - 2 * (rotation.x*rotation.x + rotation.y*rotation.y);
+				
+			}
+
+			if (Model.S) {
+
+				position.x -= 2 * (rotation.x*rotation.z + rotation.w*rotation.y);
+				position.y -= 2 * (rotation.y*rotation.z - rotation.w*rotation.x);
+				position.z -= 1 - 2 * (rotation.x*rotation.x + rotation.y*rotation.y);
+			}
+
+			if (Model.A) {
+				//strafe left
+				//left vector
+				position.x -= 1 - 2 * (rotation.y*rotation.y + rotation.z*rotation.z);
+				position.y -= 2 * (rotation.x*rotation.y + rotation.w*rotation.z);
+				position.z -= 2 * (rotation.x*rotation.z - rotation.w*rotation.y);
+			}
+
+			if (Model.D) {
+				position.x += 1 - 2 * (rotation.y*rotation.y + rotation.z*rotation.z);
+				position.y += 2 * (rotation.x*rotation.y + rotation.w*rotation.z);
+				position.z += 2 * (rotation.x*rotation.z - rotation.w*rotation.y);
+			}
+			 
+			if (Model.up) {
+				//rotation.x -= Engine.rotateSpeed;
+				
+				//var quat:Quaternion = Engine.eulerToQuat(rotation);
+				var moveVector:Point3d = new Point3d(-Engine.rotateSpeed * MATH_DEG_TO_RAD, 0, 0);
+                var quat1:Quaternion = EngineMath.eulerToQuat( moveVector);
+                rotation = EngineMath.quatMul( rotation, quat1);
+				//rotation = Engine.quatToEuler(res);
+				/**/
+				
+			}
+			
+			if (Model.down) {
+				//rotation.x += Engine.rotateSpeed;
+				
+				//var quat:Quaternion  = Engine.eulerToQuat(rotation);
+				var moveVector:Point3d = new Point3d(Engine.rotateSpeed * MATH_DEG_TO_RAD, 0, 0);
+                var quat1:Quaternion = EngineMath.eulerToQuat( moveVector);
+                rotation = EngineMath.quatMul( rotation, quat1);
+				//rotation = Engine.quatToEuler(res);
+				/**/
+			}
+			
+			if (Model.right) {
+				
+				//rotation.y += Engine.rotateSpeed * elapsedTime;
+				
+				//var quat:Quaternion  = Engine.eulerToQuat(rotation);
+				var moveVector:Point3d = new Point3d(0, Engine.rotateSpeed * MATH_DEG_TO_RAD,0);
+                var quat1:Quaternion = EngineMath.eulerToQuat( moveVector);
+                rotation = EngineMath.quatMul( rotation, quat1);
+				//rotation = Engine.quatToEuler(res);
+				/**/
+                    
+			}
+
+			if (Model.left) {
+				//rotation.y -= Engine.rotateSpeed * elapsedTime;
+				
+				//var quat:Quaternion  = Engine.eulerToQuat(rotation);
+				var moveVector:Point3d = new Point3d(0, -Engine.rotateSpeed * MATH_DEG_TO_RAD, 0);
+                var quat1:Quaternion = EngineMath.eulerToQuat( moveVector);
+                rotation = EngineMath.quatMul( rotation, quat1);
+				//rotation = Engine.quatToEuler(res);
+				/**/
+			}
+			
+			if (Model.Q) {
+				//rotation.y -= Engine.rotateSpeed * elapsedTime;
+				
+				//var quat:Quaternion  = Engine.eulerToQuat(rotation);
+				var moveVector:Point3d = new Point3d(0, 0, -Engine.rotateSpeed * MATH_DEG_TO_RAD);
+                var quat1:Quaternion = EngineMath.eulerToQuat( moveVector);
+                rotation = EngineMath.quatMul( rotation, quat1);
+				//rotation = Engine.quatToEuler(res);
+				/**/
+			}
+			
+			if (Model.E) {
+				//rotation.y -= Engine.rotateSpeed * elapsedTime;
+				
+				//var quat:Quaternion  = Engine.eulerToQuat(rotation);
+				var moveVector:Point3d = new Point3d(0, 0, Engine.rotateSpeed * MATH_DEG_TO_RAD);
+                var quat1:Quaternion = EngineMath.eulerToQuat( moveVector);
+                rotation = EngineMath.quatMul( rotation, quat1);
+				//rotation = Engine.quatToEuler(res);
+				/**/
+			}
+			
+/**/		
+			prevTime = currTime;
+
+			//stage.removeEventListener(Event.ENTER_FRAME, update);
+
+		}
+		
+		private function myKeyDown(e: KeyboardEvent): void {
 
 			if (e.keyCode == Keyboard.UP) {
 				Model.up = true;
@@ -79,13 +205,19 @@
 			if (e.keyCode == Keyboard.D) {
 				Model.D = true;
 			}
+			if (e.keyCode == Keyboard.E) {
+				Model.E = true;
+			}
+			if (e.keyCode == Keyboard.Q) {
+				Model.Q = true;
+			}
 
 		}
 
 
 
 
-		function myKeyUp(e: KeyboardEvent): void {
+		private function myKeyUp(e: KeyboardEvent): void {
 
 			if (e.keyCode == Keyboard.UP) {
 				Model.up = false;
@@ -118,81 +250,12 @@
 			if (e.keyCode == Keyboard.D) {
 				Model.D = false;
 			}
-
-		}
-		
-		public function update(): void {
-			
-			currTime = getTimer();
-			var elapsedTime:Number = currTime - prevTime;
-			
-			
-			
-			if (Model.W) {
-				speed = Engine.moveSpeed * elapsedTime;
-				//my current angle in radians
-				var COS: Number = Math.cos(rotation.y) * speed;
-				var SIN: Number = Math.sin(rotation.y) * speed;
-				//move the player
-				position.x += SIN ;
-				position.z += COS;
+			if (e.keyCode == Keyboard.E) {
+				Model.E = false;
 			}
-
-			if (Model.S) {
-				speed = -Engine.moveSpeed* elapsedTime;
-				//my current angle in radians
-				var COS: Number = Math.cos(rotation.y) * speed;
-				var SIN: Number = Math.sin(rotation.y) * speed;
-				//move the player
-				position.x += SIN;
-				position.z += COS;
+			if (e.keyCode == Keyboard.Q) {
+				Model.Q = false;
 			}
-
-			if (Model.A) {
-				//strafe left
-				speed = -Engine.moveSpeed * elapsedTime;
-				var leftRot:Number = rotation.y + (Math.PI / 2);
-				var COS: Number = Math.cos(leftRot) * speed;
-				var SIN: Number = Math.sin(leftRot) * speed;
-				position.x += SIN;
-				position.z += COS;
-			}
-
-			if (Model.D) {
-				speed = Engine.moveSpeed * elapsedTime;
-				//strafe right
-				var rightRot:Number = rotation.y + (Math.PI / 2);
-				var COS: Number = Math.cos(rightRot) * speed;
-				var SIN: Number = Math.sin(rightRot) * speed;
-				position.x += SIN;
-				position.z += COS;
-			}
-			 
-			if (Model.up) {
-				//rotation.x -= Engine.rotateSpeed;
-			}
-			
-			if (Model.down) {
-				//rotation.x += Engine.rotateSpeed;
-			}
-			
-			if (Model.right) {
-				
-				rotation.y += Engine.rotateSpeed * elapsedTime;
-				
-			}
-
-			if (Model.left) {
-				
-				rotation.y -= Engine.rotateSpeed * elapsedTime;
-				
-				
-			}
-			
-/**/		
-			prevTime = currTime;
-
-			//stage.removeEventListener(Event.ENTER_FRAME, update);
 
 		}
 

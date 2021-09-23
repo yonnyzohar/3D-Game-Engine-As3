@@ -43,7 +43,7 @@
 			return screenPositions;
 		}
 
-		public function calculateWorldPos(_rotation: Point3d, _position: Point3d): void {
+		public function calculateWorldPos(_rotation: Quaternion, _position: Point3d): void {
 
 
 			worldPositions[0] = getWorldTranslation(p1, _rotation, _position);
@@ -53,19 +53,29 @@
 		}
 
 		public function calculateCameraView(camera: Camera) {
+
+			var i: int = 0;
+
+
 			// Translate
 			var cameraPos: Point3d = camera.getPosition();
 			var translateBy: Point3d = new Point3d(-cameraPos.x, -cameraPos.y, -cameraPos.z);
-			for (var i: int = 0; i < 3; i++) {
+			for (i = 0; i < 3; i++) {
 				cameraPositions[i] = Engine.translate(worldPositions[i], translateBy);
 			}
 
 
 			// Rotate
-			var cameraRot: Point3d = camera.getRotation();
-			var rotateBy: Point3d = new Point3d(-cameraRot.x, -cameraRot.y, -cameraRot.z);
+			var cameraRot: Quaternion = camera.getRotation();
+			var rotateBy: Quaternion = new Quaternion(-cameraRot.x, -cameraRot.y, -cameraRot.z, -cameraRot.w);
 			for (i = 0; i < 3; i++) {
+				var camPos: Point3d = new Point3d(cameraPositions[i].x, cameraPositions[i].y, cameraPositions[i].z, cameraPositions[i].u, cameraPositions[i].v);
+				camPos.w = cameraPositions[i].w;
+
 				cameraPositions[i] = Engine.rotate(cameraPositions[i], rotateBy);
+				cameraPositions[i].u = camPos.u;
+				cameraPositions[i].v = camPos.v;
+				cameraPositions[i].w = camPos.w;
 			}
 
 
@@ -95,9 +105,16 @@
 			return p;
 		}
 
-		private function getWorldTranslation(p: Point3d, _rotation: Point3d, _position: Point3d): Point3d {
+		private function getWorldTranslation(p: Point3d, _rotation: Quaternion, _position: Point3d): Point3d {
+
+			var tempPos: Point3d = new Point3d(p.x, p.y, p.z, p.u, p.v);
+			tempPos.w = p.w;
 			//rotation
 			var p: Point3d = Engine.rotate(p, _rotation);
+			p.u = tempPos.u;
+			p.v = tempPos.v;
+			p.w = tempPos.w;
+
 			// translate
 			p = Engine.translate(p, _position);
 
@@ -106,7 +123,7 @@
 		}
 
 
-		public function draw(zBuffer:Array): void {
+		public function draw(zBuffer: Array): void {
 
 			//in order to fill the polygon triangle, we first need to sort the points from top to bottom.
 			//we are going to go over the points and fill in the shape, line by line from left to right
@@ -125,7 +142,7 @@
 					nextP = screenPositions[0];
 				}
 
-				var distanceH: Number = Engine.getDistance(p, nextP);
+				var distanceH: Number = EngineMath.getDistance(p, nextP);
 				var distanceX: Number = nextP.x - p.x;
 				var distanceY: Number = nextP.y - p.y;
 
@@ -136,7 +153,7 @@
 				var startY: Number = p.y;
 
 				for (var i: int = 0; i < distanceH; i++) {
-					Engine.bd.setPixel(startX, startY, 0x000000);
+					Engine.bd.setPixel(startX, startY, 0xffffff);
 					startX += cos;
 					startY += sin;
 				}
@@ -144,7 +161,7 @@
 			}
 		}
 
-		private function fillTriangle(zBuffer:Array): void {
+		private function fillTriangle(zBuffer: Array): void {
 			var p0: Point3d = screenPositions[0];
 			var p1: Point3d = screenPositions[1];
 			var p2: Point3d = screenPositions[2];
@@ -196,7 +213,7 @@
 					var ue: Number = p0u + (_y - p0y) / (p2y - p0y) * (p2u - p0u);
 					var ve: Number = p0v + (_y - p0y) / (p2y - p0y) * (p2v - p0v);
 					var we: Number = p0w + (_y - p0y) / (p2y - p0y) * (p2w - p0w);
-					
+
 					//z buffer start and end
 					var zs: Number = p0z + (_y - p0y) / (p1y - p0y) * (p1z - p0z);
 					var ze: Number = p0z + (_y - p0y) / (p2y - p0y) * (p2z - p0z);
@@ -220,7 +237,7 @@
 						aux = ws;
 						ws = we;
 						we = aux;
-						
+
 						//swap z
 						aux = zs;
 						zs = ze;
@@ -246,10 +263,11 @@
 							v += vstep;
 							w += wstep;
 							z += zstep;
-							
+
 							if (zBuffer[Engine.resolutionX * _y + _x] == 0 || zBuffer[Engine.resolutionX * _y + _x] > z) {
 
 								var pixel: uint = bd.getPixel(u / w, v / w); //Engine.getPixelFromTexture(bd, u/w, v/w);
+
 								Engine.bd.setPixel(_x, _y, pixel);
 								zBuffer[Engine.resolutionX * _y + _x] = z;
 							}
@@ -286,7 +304,7 @@
 					var ve: Number = p0v + (_y - p0y) / (p2y - p0y) * (p2v - p0v);
 
 					var we: Number = p0w + (_y - p0y) / (p2y - p0y) * (p2w - p0w);
-					
+
 					//z buffer start and end
 					var zs: Number = p1z + (_y - p1y) / (p2y - p1y) * (p2z - p1z);
 					var ze: Number = p0z + (_y - p0y) / (p2y - p0y) * (p2z - p0z);
@@ -308,7 +326,7 @@
 						aux = ws;
 						ws = we;
 						we = aux;
-						
+
 						//swap z
 						aux = zs;
 						zs = ze;
@@ -325,7 +343,7 @@
 
 						var w: Number = ws;
 						var wstep: Number = (we - ws) / triangleCurrWidth;
-						
+
 						var z: Number = zs;
 						var zstep: Number = (ze - zs) / (triangleCurrWidth);
 
@@ -335,7 +353,7 @@
 							v += vstep;
 							w += wstep;
 							z += zstep;
-							
+
 							if (zBuffer[Engine.resolutionX * _y + _x] == 0 || zBuffer[Engine.resolutionX * _y + _x] > z) {
 								var pixel: uint = bd.getPixel(u / w, v / w); //Engine.getPixelFromTexture(bd, u/w, v/w);
 								Engine.bd.setPixel(_x, _y, pixel);
@@ -638,44 +656,38 @@
 		}
 
 		//checks if triangles are partially inside the frusom or if they are behind me. in that case we need to clip them (dont need to render what is behind me)
-		public function getZClippedTriangles():Array {
-			var toReturn:Array = [];
+		public function getZClippedTriangles(): Array {
+			var toReturn: Array = [];
 			toReturn.push(new Polygon(cameraPositions[0], cameraPositions[1], cameraPositions[2], bd));
 
-			var noTriangles:int;
+			var noTriangles: int;
 			var insidePoints: Array = []; // array of points3d
 			var outsidePoints: Array = []; // array of points3d
 
 			// Z
 			noTriangles = toReturn.length;
-			for (var i:int = 0; i < noTriangles; i++) {
+			for (var i: int = 0; i < noTriangles; i++) {
 
 				var currentTriangle: Polygon = toReturn.shift(); //reference to first element in list
 
 				insidePoints.splice(0);
 				outsidePoints.splice(0);
 
-				var pointsAreOutside:Array = [];
-				for (var j:int = 0; j < 3; j++) {
+				var pointsAreOutside: Array = [];
+				for (var j: int = 0; j < 3; j++) {
 					pointsAreOutside[j] = currentTriangle.getCameraPositions()[j].z < 0;
-					if (pointsAreOutside[j])
-					{
+					if (pointsAreOutside[j]) {
 						outsidePoints.push(currentTriangle.getCameraPositions()[j]);
-					}
-						
-					else
-					{
+					} else {
 						insidePoints.push(currentTriangle.getCameraPositions()[j]);
 					}
-						
+
 				}
 
-				if (outsidePoints.length == 0) 
-				{
+				if (outsidePoints.length == 0) {
 					toReturn.push(new Polygon(insidePoints[0], insidePoints[1], insidePoints[2], bd));
-				} 
-				else if (outsidePoints.length == 1) {
-					
+				} else if (outsidePoints.length == 1) {
+
 					var extraPoint1: Point3d = new Point3d(0, 0, 0, 0, 0);
 					extraPoint1.x = outsidePoints[0].x + (0 - outsidePoints[0].z) * (insidePoints[0].x - outsidePoints[0].x) / (insidePoints[0].z - outsidePoints[0].z);
 					extraPoint1.y = outsidePoints[0].y + (0 - outsidePoints[0].z) * (insidePoints[0].y - outsidePoints[0].y) / (insidePoints[0].z - outsidePoints[0].z);

@@ -4,7 +4,7 @@
 	public class GameObject {
 		public var polygons: Array;
 		public var position: Point3d;
-		public var rotation: Point3d;
+		public var rotation: Quaternion;
 		public var scale:Point3d;
 		public var bd:BitmapData;
 		

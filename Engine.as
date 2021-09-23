@@ -3,17 +3,20 @@
 	import flash.events.*;
 	import flash.display.*;
 	import flash.geom.Rectangle;
-	
+
 
 	public class Engine extends MovieClip {
+
+
+		
 
 		private static var fieldOfView: Number = 45;
 		public static var resolutionX: Number;
 		public static var resolutionY: Number;
 		public static var z0;
 
-		public static var moveSpeed: Number = 1;
-		public static var rotateSpeed: Number = 0.001;
+		public static var moveSpeed: Number = 2;
+		public static var rotateSpeed: Number = .1;
 
 		private var gameObjects: Array = [];
 
@@ -21,43 +24,41 @@
 
 		private var bmp: Bitmap;
 		public static var bd: BitmapData;
-		private var zBuffer:Array = [];
-		
+		private var zBuffer: Array = [];
+
 
 
 		public function Engine() {
 			// constructor code
 			resolutionX = stage.stageWidth;
 			resolutionY = stage.stageHeight;
-			z0 = (resolutionX / 2.0) / Math.tan(degreesToRad(fieldOfView / 2.0));
+			z0 = (resolutionX / 2.0) / Math.tan(EngineMath.degreesToRad(fieldOfView / 2.0));
 
 			bd = new BitmapData(resolutionX, resolutionY, false);
 			bmp = new Bitmap(bd);
 			stage.addChild(bmp);
-			
-			
-			var position:Point3d = new Point3d(0, 10, 5000);
-			var rotation:Point3d = new Point3d(-1.5, 0, 0);
-			var scale:Point3d = new Point3d(1, 1, 1);
-			//gameObjects.push(new Plane(position, rotation, scale, img));
-			
-			var arr:Array = [new Img0(), new Img1(), new Img2(), new Img3()];
-			
-			var dist:int = 500;
-			for(var row:int = 0; row < 5; row++)
-			{
-				for(var col:int = 0; col < 5; col++)
-				{
-					position = new Point3d(col * dist, (Math.random() * 500) - 200, dist * row);
-					rotation = new Point3d(0, Math.random() * Math.PI, 0);
-					scale = new Point3d(1, 1 , 1);
-					gameObjects.push(new Cube(position, rotation, scale, arr[int (Math.random() * arr.length)]));
-				}
-				
-			}
-			
 
-			camera = new Camera(stage, new Point3d(0, 0, 0), new Point3d(0, 0, 0));
+
+			var position: Point3d = new Point3d(0, 10, 5000);
+			var rotation: Quaternion = new Quaternion(0, 0, 0, 1);
+			var scale: Point3d = new Point3d(1, 1, 1);
+			//gameObjects.push(new Plane(position, rotation, scale, img));
+
+			var arr: Array = [new Img0(), new Img1(), new Img2(), new Img3()];
+
+			var dist: int = 500;
+			for (var row: int = 0; row < 10; row++) {
+				for (var col: int = 0; col < 10; col++) {
+					position = new Point3d(col * dist, 0, dist * row);
+					rotation = new Quaternion(0, 0, 0, 1);
+					scale = new Point3d(1, 1, 1);
+					gameObjects.push(new Cube(position, rotation, scale, arr[int(Math.random() * arr.length)]));
+				}
+
+			}
+
+
+			camera = new Camera(stage, new Point3d(0, 0, -100), new Quaternion(0, 0, 0, 1));
 
 			stage.addEventListener(Event.ENTER_FRAME, update);
 		}
@@ -65,11 +66,10 @@
 		function update(e: Event): void {
 			Engine.bd.lock();
 			var i: int = 0;
-			for(i = 0; i < resolutionX * resolutionY; i++)
-			{
+			for (i = 0; i < resolutionX * resolutionY; i++) {
 				zBuffer[i] = 0;
 			}
-			
+
 			Engine.bd.fillRect(new Rectangle(0, 0, resolutionX, resolutionY), 0x000000);
 
 			var totalPolygonsPreClip: Array = [];
@@ -91,11 +91,11 @@
 
 			//sorting by average z will solve most z index issues but not all
 			//totalPolygonsPreClip.sortOn("averageZ", Array.NUMERIC | Array.DESCENDING);//, 
-			
-			var totalPolygons:Array = [];
+
+			var totalPolygons: Array = [];
 			for (var j: int = 0; j < totalPolygonsPreClip.length; j++) {
 				var polygon: Polygon = totalPolygonsPreClip[j];
-				
+
 				var clippedTriangles: Array = polygon.getZClippedTriangles();
 				for (var h: int = 0; h < clippedTriangles.length; h++) {
 					totalPolygons.push(clippedTriangles[h]);
@@ -130,6 +130,15 @@
 			return newPoint
 		}
 
+		public static function rotate(original: Point3d, rotation: Quaternion): Point3d {
+			var newPoint: Point3d = EngineMath.vec3MulQuat(original, rotation);
+			newPoint.w = original.w;
+
+			return newPoint;
+
+		}
+		/*
+		//old euler based rotation
 		public static function rotate(original: Point3d, rotation: Point3d): Point3d {
 			var cos = Math.cos;
 			var sin = Math.sin;
@@ -145,6 +154,12 @@
 			return newPoint;
 
 		}
+		*/
+
+		
+
+
+		////////////////////////////////////////////////
 
 		public static function applyPerspective(orig: Point3d): Point3d {
 			var returnX: Number = orig.x * z0 / (z0 + orig.z);
@@ -173,24 +188,10 @@
 
 		}
 
-	
+
 
 		/////////////////-------------------------/////////////////////////////////
-		public static function radToDegrees(rads: Number): Number {
-			return rads * 180.0 / Math.PI;
-		}
-
-		public static function degreesToRad(degs: Number): Number {
-			return degs * Math.PI / 180.0;
-		}
-
-		public static function getDistance(p1: Point3d, p2: Point3d): Number {
-
-			var dX: Number = p1.x - p2.x;
-			var dY: Number = p1.y - p2.y;
-			var dist: Number = Math.sqrt(dX * dX + dY * dY);
-			return dist;
-		}
+		
 
 	}
 
