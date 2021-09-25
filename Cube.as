@@ -38,13 +38,20 @@
 			
 
 			];
+			
+			super();
 		}
 
 		override public function update(): void {
 			var MATH_DEG_TO_RAD:Number =  0.0174532925;
-			var moveVector:Point3d = new Point3d(0, -Engine.rotateSpeed *MATH_DEG_TO_RAD, 0);
+			var moveVector:Point3d = new Point3d(0, -(Engine.rotateSpeed * 2) *MATH_DEG_TO_RAD, 0);
 			var quat1:Quaternion = EngineMath.eulerToQuat( moveVector);
 			rotation = EngineMath.quatMul( rotation, quat1);
+			
+			//camera.cameraLookAt(cube.position);
+			super.update()
+			
+			
 		}
 
 		

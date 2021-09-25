@@ -8,15 +8,12 @@
 	public class Engine extends MovieClip {
 
 
-		
-
-		private static var fieldOfView: Number = 45;
 		public static var resolutionX: Number;
 		public static var resolutionY: Number;
-		public static var z0;
+
 
 		public static var moveSpeed: Number = 2;
-		public static var rotateSpeed: Number = .1;
+		public static var rotateSpeed: Number = 2;
 
 		private var gameObjects: Array = [];
 
@@ -32,35 +29,45 @@
 			// constructor code
 			resolutionX = stage.stageWidth;
 			resolutionY = stage.stageHeight;
-			z0 = (resolutionX / 2.0) / Math.tan(EngineMath.degreesToRad(fieldOfView / 2.0));
+
 
 			bd = new BitmapData(resolutionX, resolutionY, false);
 			bmp = new Bitmap(bd);
 			stage.addChild(bmp);
 
-
-			var position: Point3d = new Point3d(0, 10, 5000);
+			var arr: Array = [new Img0(), new Img1(), new Img2(), new Img3()];
+			var position: Point3d = new Point3d(600, 600, 5000);
 			var rotation: Quaternion = new Quaternion(0, 0, 0, 1);
 			var scale: Point3d = new Point3d(1, 1, 1);
-			//gameObjects.push(new Plane(position, rotation, scale, img));
+			//var cube: Cube = new Cube(position, rotation, scale, arr[int(Math.random() * arr.length)])
+			//gameObjects.push(cube);
+			//gameObjects.push(new Plane(position, rotation, scale, arr[0]));
 
-			var arr: Array = [new Img0(), new Img1(), new Img2(), new Img3()];
-
-			var dist: int = 500;
-			for (var row: int = 0; row < 10; row++) {
-				for (var col: int = 0; col < 10; col++) {
-					position = new Point3d(col * dist, 0, dist * row);
-					rotation = new Quaternion(0, 0, 0, 1);
-					scale = new Point3d(1, 1, 1);
-					gameObjects.push(new Cube(position, rotation, scale, arr[int(Math.random() * arr.length)]));
+			/**/
+			var dist: int = 2000;
+			for (var _y: int = 0; _y < 5; _y++) {
+				for (var _z: int = 0; _z < 5; _z++) {
+					for (var _x: int = 0; _x < 5; _x++) {
+						position = new Point3d(_x * dist, _y * dist, dist * _z);
+						rotation = new Quaternion(Math.random(), Math.random(), Math.random(), 1);
+						scale = new Point3d(1, 1, 1);
+						gameObjects.push(new Cube(position, rotation, scale, arr[int(Math.random() * arr.length)]));
+					}
 				}
-
 			}
 
 
-			camera = new Camera(stage, new Point3d(0, 0, -100), new Quaternion(0, 0, 0, 1));
+
+			//new Point3d(0, 0, -100), new Quaternion(0, 0, 0, 1)
+			var camPos: Point3d = new Point3d(-3205.284990943313, -3536.4845982178817, -4027.9614941237405);
+			var camRot: Quaternion = new Quaternion(-0.16317591100567008, 0.3368240884762062, 0.059391174481627555, 0.9254165785652491);
+
+			camera = new Camera(stage, camPos, camRot);
 
 			stage.addEventListener(Event.ENTER_FRAME, update);
+
+
+
 		}
 
 		function update(e: Event): void {
@@ -137,7 +144,63 @@
 			return newPoint;
 
 		}
+
+		//take screen coords and translate them to a 3d point in the world
+		public static function unprojectCoordinate(_camera: Camera, _x: Number, _y: Number, depth: Number): Vector3 {
+			// Get the number of parameters.
+
+
+			var cameraMatrix: Matrix4x4 = _camera.transformMatrix;
+			var view: Matrix4x4 = EngineMath.mtxInverse(cameraMatrix);
+
+
+			var proj: Matrix4x4 = EngineMath.mtxProjLh(_camera.fovY, _camera.aspectRatio, Camera.zNear, Camera.zFar);
+
+			var viewPort: Rectangle = new Rectangle(0, 0, resolutionX, resolutionY);
+
+			//this is the destination we pass on to camera look at
+			var toPoint: Vector3 = unprojectScreenCoordinats(viewPort, _x, _y, depth, view, proj);
+			return toPoint;
+
+		}
+
+		public static function unprojectScreenCoordinats(viewport: Rectangle, _x: Number, _y: Number, depth: Number, view: Matrix4x4, proj: Matrix4x4): Vector3 {
+
+			var screen: Vector4 = new Vector4(0, 0, 0, 0);
+			screen.x = (_x - viewport.x) / viewport.width;
+			screen.y = ((viewport.height - _y) - viewport.y) / viewport.height;
+			// depth between 0-1
+			screen.z = depth;
+			screen.w = 1.0;
+
+			// Map to range -1 to 1. without this we cant turn left
+			screen.x = screen.x * 2.0 - 1.0;
+			screen.y = screen.y * 2.0 - 1.0;
+			screen.z = screen.z * 2.0 - 1.0;
+
+			// Transform the screen-space NDC by our inverse view projection matrix.
+			var viewProj: Matrix4x4 = EngineMath.mtxMul(view, proj);
+
+			var invViewProj: Matrix4x4 = EngineMath.mtxInverse(viewProj);
+			var res: Vector4 = EngineMath.vec4MulMtx(screen, invViewProj);
+			// Divide by our W coordinate.
+			if (res.w != 0.0) {
+				res.x /= res.w;
+				res.y /= res.w;
+				res.z /= res.w;
+			}
+
+			return new Vector3(res.x, res.y, res.z);
+		}
 		/*
+		
+		inline float getDepthFromDistance(float distFromCamera, float zNear, float zFar)
+    {
+        float depth = (distFromCamera - zNear)/(zFar - zNear);
+        return depth;
+    }
+		
+		
 		//old euler based rotation
 		public static function rotate(original: Point3d, rotation: Point3d): Point3d {
 			var cos = Math.cos;
@@ -156,20 +219,21 @@
 		}
 		*/
 
-		
+
 
 
 		////////////////////////////////////////////////
 
 		public static function applyPerspective(orig: Point3d): Point3d {
-			var returnX: Number = orig.x * z0 / (z0 + orig.z);
-			var returnY: Number = orig.y * z0 / (z0 + orig.z);
+			var zNear: Number = Camera.zNear;
+			var returnX: Number = orig.x * zNear / (zNear + orig.z);
+			var returnY: Number = orig.y * zNear / (zNear + orig.z);
 			var returnZ: Number = orig.z;
 
 			//this is to fix texture warping
-			var returnU: Number = orig.u * z0 / (z0 + orig.z);
-			var returnV: Number = orig.v * z0 / (z0 + orig.z);
-			var returnW: Number = orig.w * z0 / (z0 + orig.z);
+			var returnU: Number = orig.u * zNear / (zNear + orig.z);
+			var returnV: Number = orig.v * zNear / (zNear + orig.z);
+			var returnW: Number = orig.w * zNear / (zNear + orig.z);
 
 			var newPoint: Point3d = new Point3d(returnX, returnY, returnZ, returnU, returnV);
 			newPoint.w = returnW;
@@ -191,7 +255,7 @@
 
 
 		/////////////////-------------------------/////////////////////////////////
-		
+
 
 	}
 

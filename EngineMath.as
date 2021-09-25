@@ -1,13 +1,16 @@
 ﻿package {
 
 	public class EngineMath {
-
-		public static var RIGHT: Point3d = new Point3d(1, 0, 0);
-		public static var LEFT: Point3d = new Point3d(-1, 0, 0);
-		public static var UP: Point3d = new Point3d(0, 1, 0);
-		public static var DOWN: Point3d = new Point3d(0, -1, 0);
-		public static var FORWARD: Point3d = new Point3d(0, 0, 1);
-		public static var BACK: Point3d = new Point3d(0, 0, -1);
+		
+		private static var LEFT_HANDEDNESS:int = 0;
+		private static var RIGHT_HANDEDNESS:int = 1;
+		
+		public static var RIGHT: Vector3 = new Vector3(1, 0, 0);
+		public static var LEFT: Vector3 = new Vector3(-1, 0, 0);
+		public static var UP: Vector3 = new Vector3(0, 1, 0);
+		public static var DOWN: Vector3 = new Vector3(0, -1, 0);
+		public static var FORWARD: Vector3 = new Vector3(0, 0, 1);
+		public static var BACK: Vector3 = new Vector3(0, 0, -1);
 
 		//get an euler direction vector, transform it to quaternion
 		public static function eulerToQuat(_rotation: Point3d): Quaternion {
@@ -110,7 +113,12 @@
 			_result.z = Math.asin(2.0 * (x * y + z * w));
 			return _result;
 		}
-		
+
+		public static function vec3Sub(_a: Vector3, _b: Vector3) {
+			return new Vector3(_a.x - _b.x, _a.y - _b.y, _a.z - _b.z);
+
+		}
+
 		/*
 		example
 		shaker::Quaternion quaternion;
@@ -120,98 +128,94 @@
         //call the look at with the forward vector and the direction vector
         bx::quatLookAt(quaternion.val, forward.val, worldUp.val);
 		*/
-		public static function quatLookAt(  forward:Point3d,  up:Point3d) {
+		public static function quatLookAt(forward: Vector3, up: Vector3): Quaternion {
 			//normalize F
-			var f_normalized:Point3d = vec3Norm(forward);
+			var f_normalized: Vector3 = vec3Norm(forward);
 
-			var right:Point3d = vec3Cross( up, f_normalized);
+			var right: Vector3 = vec3Cross(up, f_normalized);
 
 			//normalize R
-			var r_normalized:Point3d = vec3Norm( right);
+			var r_normalized: Vector3 = vec3Norm(right);
 
 			//normalized up
-			var u_normalized:Point3d = vec3Cross( f_normalized, r_normalized);
+			var u_normalized: Vector3 = vec3Cross(f_normalized, r_normalized);
 
-			var rX:Number = r_normalized.x; //x
-			var rY:Number = r_normalized.y; //y
-			var rZ:Number = r_normalized.z; //z
+			var rX: Number = r_normalized.x; //x
+			var rY: Number = r_normalized.y; //y
+			var rZ: Number = r_normalized.z; //z
 
-			var uX:Number = u_normalized.x; //x
-			var uY:Number = u_normalized.y; //y
-			var uZ:Number = u_normalized.z; //x
+			var uX: Number = u_normalized.x; //x
+			var uY: Number = u_normalized.y; //y
+			var uZ: Number = u_normalized.z; //x
 
-			var fX:Number = f_normalized.x; //x
-			var fY:Number = f_normalized.y; //y
-			var fZ:Number = f_normalized.z; //z
+			var fX: Number = f_normalized.x; //x
+			var fY: Number = f_normalized.y; //y
+			var fZ: Number = f_normalized.z; //z
 
-			var _result:Quaternion = new Quaternion(0,0,0,0);
+			var _result: Quaternion = new Quaternion(0, 0, 0, 0);
 			////
-			var num8:Number = (rX + uY) + fZ;
+			var num8: Number = (rX + uY) + fZ;
 			if (num8 > 0.0) {
-				var num:Number = Math.sqrt(num8 + 1.0);
+				var num: Number = Math.sqrt(num8 + 1.0);
 				_result.w = num * 0.5;
 				num = 0.5 / num;
 				_result.x = (uZ - fY) * num;
 				_result.y = (fX - rZ) * num;
 				_result.z = (rY - uX) * num;
 			} else if ((rX >= uY) && (rX >= fZ)) {
-				var num7:Number = Math.sqrt(((1.0 + rX) - uY) - fZ);
-				var num4:Number = 0.5 / num7;
+				var num7: Number = Math.sqrt(((1.0 + rX) - uY) - fZ);
+				var num4: Number = 0.5 / num7;
 				_result.x = 0.5 * num7;
 				_result.y = (rY + uX) * num4;
 				_result.z = (rZ + fX) * num4;
 				_result.w = (uZ - fY) * num4;
 			} else if (uY > fZ) {
-				var num6:Number = Math.sqrt(((1.0 + uY) - rX) - fZ);
-				var num3:Number = 0.5 / num6;
+				var num6: Number = Math.sqrt(((1.0 + uY) - rX) - fZ);
+				var num3: Number = 0.5 / num6;
 				_result.x = (uX + rY) * num3;
 				_result.y = 0.5 * num6;
 				_result.z = (fY + uZ) * num3;
 				_result.w = (fX - rZ) * num3;
 			} else {
-				var num5:Number = Math.sqrt(((1.0 + fZ) - rX) - uY);
-				var num2:Number = 0.5 / num5;
+				var num5: Number = Math.sqrt(((1.0 + fZ) - rX) - uY);
+				var num2: Number = 0.5 / num5;
 				_result.x = (fX + rZ) * num2;
 				_result.y = (fY + uZ) * num2;
 				_result.z = 0.5 * num5;
 				_result.w = (rY - uX) * num2;
 			}
-			
+
 			return _result;
 
 
 		}
-		
-		public static function vec3Norm( _a:Point3d)
-		{
-			var _result:Point3d = new Point3d(0,0,0);
-			var len:Number = vec3Length(_a);
-			var invLen:Number = 1.0/len;
+
+		public static function vec3Norm(_a: Vector3) {
+			var _result: Vector3 = new Vector3(0, 0, 0);
+			var len: Number = vec3Length(_a);
+			var invLen: Number = 1.0 / len;
 			_result.x = _a.x * invLen;
 			_result.y = _a.y * invLen;
 			_result.z = _a.z * invLen;
 			return _result;
 		}
-		
-		public static function vec3Length(_a:Point3d):Number
-		{
-			return Math.sqrt(vec3Dot(_a, _a) );
+
+		public static function vec3Length(_a: Vector3): Number {
+			return Math.sqrt(vec3Dot(_a, _a));
 		}
-		
-		public static function vec3Dot( _a:Point3d,  _b:Point3d):Number
-		{
-			return _a.x*_b.x + _a.y*_b.y + _a.z*_b.z;
+
+		public static function vec3Dot(_a: Vector3, _b: Vector3): Number {
+			return _a.x * _b.x + _a.y * _b.y + _a.z * _b.z;
 		}
-		
-		public static function vec3Cross(  _a:Point3d,  _b:Point3d):Point3d
-		{
-			var _result:Point3d = new Point3d(0,0,0);
-			_result.x = _a.y*_b.z - _a.z*_b.y;
-			_result.y = _a.z*_b.x - _a.x*_b.z;
-			_result.z = _a.x*_b.y - _a.y*_b.x;
+
+		public static function vec3Cross(_a: Vector3, _b: Vector3): Vector3 {
+			var _result: Vector3 = new Vector3(0, 0, 0);
+			_result.x = _a.y * _b.z - _a.z * _b.y;
+			_result.y = _a.z * _b.x - _a.x * _b.z;
+			_result.z = _a.x * _b.y - _a.y * _b.x;
 			return _result;
 		}
-		
+
 		public static function radToDegrees(rads: Number): Number {
 			return rads * 180.0 / Math.PI;
 		}
@@ -220,7 +224,7 @@
 			return degs * Math.PI / 180.0;
 		}
 
-		public static function getDistance(p1: Point3d, p2: Point3d): Number {
+		public static function getDistance(p1: Vector3, p2: Vector3): Number {
 
 			var dX: Number = p1.x - p2.x;
 			var dY: Number = p1.y - p2.y;
@@ -228,12 +232,217 @@
 			return dist;
 		}
 
+		/*
+		0 public var a1:Number;
+		1 public var a2:Number;
+		2 public var a3:Number;
+		3 public var a4:Number;
+		
+		4 public var b1:Number;
+		5 public var b2:Number;
+		6 public var b3:Number; 
+		7 public var b4:Number;
+		
+		8  c1:Number
+		9  c2:Number;
+		10 c3:Number;
+		11 c4:Number;
+		
+		12 d1:Number
+		13 d2:Number;
+		14 d3:Number;
+		15 d4:Number;
+		
+		*/
+
+		
+
+
+		public static function mtxInverse(_a: Matrix4x4): Matrix4x4 {
+			var xx: Number = _a.a1;
+			var xy: Number = _a.a2;
+			var xz: Number = _a.a3;
+			var xw: Number = _a.a4;
+			var yx: Number = _a.b1;
+			var yy: Number = _a.b2;
+			var yz: Number = _a.b3;
+			var yw: Number = _a.b4;
+			var zx: Number = _a.c1;
+			var zy: Number = _a.c2;
+			var zz: Number = _a.c3;
+			var zw: Number = _a.c4;
+			var wx: Number = _a.d1;
+			var wy: Number = _a.d2;
+			var wz: Number = _a.d3;
+			var ww: Number = _a.d4;
+
+			var det: Number = 0.0;
+			det += xx * (yy * (zz * ww - zw * wz) - yz * (zy * ww - zw * wy) + yw * (zy * wz - zz * wy));
+			det -= xy * (yx * (zz * ww - zw * wz) - yz * (zx * ww - zw * wx) + yw * (zx * wz - zz * wx));
+			det += xz * (yx * (zy * ww - zw * wy) - yy * (zx * ww - zw * wx) + yw * (zx * wy - zy * wx));
+			det -= xw * (yx * (zy * wz - zz * wy) - yy * (zx * wz - zz * wx) + yz * (zx * wy - zy * wx));
+
+			var invDet: Number = 1.0 / det;
+
+			var _result: Matrix4x4 = new Matrix4x4();
+			_result.a1 = +(yy * (zz * ww - wz * zw) - yz * (zy * ww - wy * zw) + yw * (zy * wz - wy * zz)) * invDet;
+			_result.a2 = -(xy * (zz * ww - wz * zw) - xz * (zy * ww - wy * zw) + xw * (zy * wz - wy * zz)) * invDet;
+			_result.a3 = +(xy * (yz * ww - wz * yw) - xz * (yy * ww - wy * yw) + xw * (yy * wz - wy * yz)) * invDet;
+			_result.a4 = -(xy * (yz * zw - zz * yw) - xz * (yy * zw - zy * yw) + xw * (yy * zz - zy * yz)) * invDet;
+
+			_result.b1 = -(yx * (zz * ww - wz * zw) - yz * (zx * ww - wx * zw) + yw * (zx * wz - wx * zz)) * invDet;
+			_result.b2 = +(xx * (zz * ww - wz * zw) - xz * (zx * ww - wx * zw) + xw * (zx * wz - wx * zz)) * invDet;
+			_result.b3 = -(xx * (yz * ww - wz * yw) - xz * (yx * ww - wx * yw) + xw * (yx * wz - wx * yz)) * invDet;
+			_result.b4 = +(xx * (yz * zw - zz * yw) - xz * (yx * zw - zx * yw) + xw * (yx * zz - zx * yz)) * invDet;
+
+			_result.c1 = +(yx * (zy * ww - wy * zw) - yy * (zx * ww - wx * zw) + yw * (zx * wy - wx * zy)) * invDet;
+			_result.c2 = -(xx * (zy * ww - wy * zw) - xy * (zx * ww - wx * zw) + xw * (zx * wy - wx * zy)) * invDet;
+			_result.c3 = +(xx * (yy * ww - wy * yw) - xy * (yx * ww - wx * yw) + xw * (yx * wy - wx * yy)) * invDet;
+			_result.c4 = -(xx * (yy * zw - zy * yw) - xy * (yx * zw - zx * yw) + xw * (yx * zy - zx * yy)) * invDet;
+
+			_result.d1 = -(yx * (zy * wz - wy * zz) - yy * (zx * wz - wx * zz) + yz * (zx * wy - wx * zy)) * invDet;
+			_result.d2 = +(xx * (zy * wz - wy * zz) - xy * (zx * wz - wx * zz) + xz * (zx * wy - wx * zy)) * invDet;
+			_result.d3 = -(xx * (yy * wz - wy * yz) - xy * (yx * wz - wx * yz) + xz * (yx * wy - wx * yy)) * invDet;
+			_result.d4 = +(xx * (yy * zz - zy * yz) - xy * (yx * zz - zx * yz) + xz * (yx * zy - zx * yy)) * invDet;
+
+			return _result;
+		}
+
+
+		public static function mtxMul( _a:Matrix4x4,  _b:Matrix4x4):Matrix4x4
+		{
+			var a:Vector4 = new Vector4(_a.a1, _a.a2, _a.a3, _a.a4);
+			var b:Vector4 = new Vector4(_a.b1, _a.b2, _a.b3, _a.b4);
+			var c:Vector4 = new Vector4(_a.c1, _a.c2, _a.c3, _a.c4);
+			var d:Vector4 = new Vector4(_a.d1, _a.d2, _a.d3, _a.d4);
+			
+			var aRes:Vector4 = vec4MulMtx(a, _b);
+			var bRes:Vector4 = vec4MulMtx(b, _b);
+			var cRes:Vector4 = vec4MulMtx(c, _b);
+			var dRes:Vector4 = vec4MulMtx(d, _b);
+			
+			var _result:Matrix4x4 = new Matrix4x4();
+			_result.a1 = aRes.x;
+			_result.a2 = aRes.y;
+			_result.a3 = aRes.z;
+			_result.a4 = aRes.w;
+
+			_result.b1 = bRes.x;
+			_result.b2 = bRes.y;
+			_result.b3 = bRes.z;
+			_result.b4 = bRes.w;
+
+			_result.c1 = cRes.x;
+			_result.c2 = cRes.y;
+			_result.c3 = cRes.z;
+			_result.c4 = cRes.w;
+
+			_result.d1 = dRes.x;
+			_result.d2 = dRes.y;
+			_result.d3 = dRes.z;
+			_result.d4 = dRes.w;
+			return _result;
+			
+		}
+		
+		public static function vec4MulMtx(_vec: Vector4, _mat: Matrix4x4): Vector4 {
+			var _result: Vector4 = new Vector4(0, 0, 0, 0);
+			_result.x = _vec.x * _mat.a1 + _vec.y * _mat.b1 + _vec.z * _mat.c1 + _vec.w * _mat.d1;
+			_result.y = _vec.x * _mat.a2 + _vec.y * _mat.b2 + _vec.z * _mat.c2 + _vec.w * _mat.d2;
+			_result.z = _vec.x * _mat.a3 + _vec.y * _mat.b3 + _vec.z * _mat.c3 + _vec.w * _mat.d3;
+			_result.w = _vec.x * _mat.a4 + _vec.y * _mat.b4 + _vec.z * _mat.c4 + _vec.w * _mat.d4;
+
+			return _result;
+		}
+		
+		
+		public static function mtxProjLh(  _fovy:Number,  _aspect:Number,  _near:Number,  _far:Number,  _oglNdc:Boolean = false):Matrix4x4
+		{
+			//_result, <Handness::Left>
+			var _result:Matrix4x4 = mtxProj_impl( _fovy, _aspect, _near, _far, _oglNdc, LEFT_HANDEDNESS);
+			return _result;
+		}
+		
+		//template <Handness::Enum HandnessT>
+		public static function mtxProj_impl( _fovy:Number,  _aspect:Number,  _near:Number,  _far:Number,  _oglNdc:Boolean = false, handedNess:int = 0):Matrix4x4
+		{
+			var height:Number = 1.0/Math.tan(degreesToRad(_fovy)*0.5);
+			var width:Number  = height * 1.0/_aspect;
+			var _result:Matrix4x4 =mtxProjXYWH( 0.0, 0.0, width, height, _near, _far, _oglNdc, handedNess);
+			return _result;
+		}
+		
+		//template <Handness::Enum HandnessT>
+		public static function mtxProjXYWH(  _x:Number,  _y:Number,  _width:Number,  _height:Number,  _near:Number,  _far:Number,  _oglNdc = false, handedNess:int = 0):Matrix4x4
+		{
+			var diff:Number = _far-_near;
+			var aa:Number = _oglNdc ?       (_far+_near)/diff : _far/diff;
+			var bb:Number = _oglNdc ?  (2.0*_far*_near)/diff : _near*aa;
+
+			var _result:Matrix4x4 = new Matrix4x4();
+			_result.a1 = 0;
+			_result.a2 = 0;
+			_result.a3 = 0;
+			_result.a4 = 0;
+
+			_result.b1 = 0;
+			_result.b2 = 0;
+			_result.b3 = 0;
+			_result.b4 = 0;
+
+			_result.c1 = 0;
+			_result.c2 = 0;
+			_result.c3 = 0;
+			_result.c4 = 0;
+
+			_result.d1 = 0;
+			_result.d2 = 0;
+			_result.d3 = 0;
+			_result.d4 = 0;
+			_result.a1 = _width;
+			_result.b2 = _height;
+			_result.c1 = (RIGHT_HANDEDNESS == handedNess) ?    _x :  -_x;
+			_result.c2 = (RIGHT_HANDEDNESS == handedNess) ?    _y :  -_y;
+			_result.c3 = (RIGHT_HANDEDNESS == handedNess) ?   -aa :   aa;
+			_result.c4 = (RIGHT_HANDEDNESS == handedNess) ? -1.0  : 1.0;
+			_result.d3 = -bb;
+			
+			return _result;
+		}
+
+
+
+
+
+
+
 	}
 
 }
 
-
 /*
+ * Copyright 2011-2016 Branimir Karadzic. All rights reserved.
+ * License: https://github.com/bkaradzic/bx#license-bsd-2-clause
+ */
+/*
+
+public static function float4x4_mul_scalar(float4x4_t* __restrict _result, const float4x4_t* __restrict _a, float scalar)
+		{
+			simd128_t b = simd_splat(scalar);
+			_result->col[0] = simd_mul(_a->col[0], b);
+			_result->col[1] = simd_mul(_a->col[1], b);
+			_result->col[2] = simd_mul(_a->col[2], b);
+			_result->col[3] = simd_mul(_a->col[3], b);
+		}
+
+
+public static function vec2PointMulMtx(float* __restrict _result, const float* __restrict _vec, const float* __restrict _mat)
+		{
+			_result[0] = _vec[0] * _mat[ 0] + _vec[1] * _mat[ 2];
+			_result[1] = _vec[0] * _mat[ 4] + _vec[1] * _mat[ 6] + _vec[2] * _mat[5];
+			
+			
+		}
 
 namespace bx
 {
@@ -474,12 +683,7 @@ namespace bx
 		_result[2] = _a[2] + _b;
 	}
 
-	inline void vec3Sub(float* __restrict _result, const float* __restrict _a, const float* __restrict _b)
-	{
-		_result[0] = _a[0] - _b[0];
-		_result[1] = _a[1] - _b[1];
-		_result[2] = _a[2] - _b[2];
-	}
+	
 
 	inline void vec3Sub(float* __restrict _result, const float* __restrict _a, float _b)
 	{
@@ -945,77 +1149,7 @@ namespace bx
 	}
     
             
-    //_result - > quetrenion result, forward vector (target - current), world up (0,1,0)
-    inline void quatLookAt(float* __restrict _result, float* __restrict forward, float* __restrict up)
-    {
-        //normalize F
-        float f_normalized[3];
-        bx::vec3Norm(f_normalized, forward); //lookAt
-        
-        float right[3];
-        bx::vec3Cross(right, up, f_normalized );
-        
-        //normalize R
-        float r_normalized[3];
-        bx::vec3Norm(r_normalized, right);
-        
-        float u_normalized[3];
-        bx::vec3Cross(u_normalized, f_normalized, r_normalized );
-        
-        float rX = r_normalized[0];//x
-        float rY = r_normalized[1];//y
-        float rZ = r_normalized[2];//z
-        
-        float uX = u_normalized[0];//x
-        float uY = u_normalized[1];//y
-        float uZ = u_normalized[2];//x
-        
-        float fX = f_normalized[0];//x
-        float fY = f_normalized[1];//y
-        float fZ = f_normalized[2];//z
-        
-        
-        ////
-        float num8 = (rX + uY) + fZ;
-        if (num8 > 0.0f)
-        {
-            float num = (float)sqrt(num8 + 1.0f);
-            _result[3] = num * 0.5f;
-            num = 0.5f / num;
-            _result[0] = (uZ - fY) * num;
-            _result[1] = (fX - rZ) * num;
-            _result[2] = (rY - uX) * num;
-        }
-        else if ((rX >= uY) && (rX >= fZ))
-        {
-            float num7 = (float)sqrt(((1.0f + rX) - uY) - fZ);
-            float num4 = 0.5f / num7;
-            _result[0] = 0.5f * num7;
-            _result[1] = (rY + uX) * num4;
-            _result[2] = (rZ + fX) * num4;
-            _result[3] = (uZ - fY) * num4;
-        }
-        else if (uY > fZ)
-        {
-            float num6 = (float)sqrt(((1.0f + uY) - rX) - fZ);
-            float num3 = 0.5f / num6;
-            _result[0] = (uX + rY) * num3;
-            _result[1] = 0.5f * num6;
-            _result[2] = (fY + uZ) * num3;
-            _result[3] = (fX - rZ) * num3;
-        }
-        else
-        {
-            float num5 = (float)sqrt(((1.0f + fZ) - rX) - uY);
-            float num2 = 0.5f / num5;
-            _result[0] = (fX + rZ) * num2;
-            _result[1] = (fY + uZ) * num2;
-            _result[2] = 0.5f * num5;
-            _result[3] = (rY - uX) * num2;
-        }
-        
-       
-    }
+    
 
 	inline void vec3MulQuat(float* __restrict _result, const float* __restrict _vec, const float* __restrict _quat)
 	{
@@ -1213,22 +1347,7 @@ namespace bx
 		mtxLookAtLh(_result, _eye, _at, _up);
 	}
 
-	template <Handness::Enum HandnessT>
-	inline void mtxProjXYWH(float* _result, float _x, float _y, float _width, float _height, float _near, float _far, bool _oglNdc = false)
-	{
-		const float diff = _far-_near;
-		const float aa = _oglNdc ?       (_far+_near)/diff : _far/diff;
-		const float bb = _oglNdc ?  (2.0f*_far*_near)/diff : _near*aa;
-
-		memset(_result, 0, sizeof(float)*16);
-		_result[ 0] = _width;
-		_result[ 5] = _height;
-		_result[ 8] = (Handness::Right == HandnessT) ?    _x :  -_x;
-		_result[ 9] = (Handness::Right == HandnessT) ?    _y :  -_y;
-		_result[10] = (Handness::Right == HandnessT) ?   -aa :   aa;
-		_result[11] = (Handness::Right == HandnessT) ? -1.0f : 1.0f;
-		_result[14] = -bb;
-	}
+	
 
 	template <Handness::Enum HandnessT>
 	inline void mtxProj_impl(float* _result, float _ut, float _dt, float _lt, float _rt, float _near, float _far, bool _oglNdc = false)
@@ -1248,13 +1367,7 @@ namespace bx
 		mtxProj_impl<HandnessT>(_result, _fov[0], _fov[1], _fov[2], _fov[3], _near, _far, _oglNdc);
 	}
 
-	template <Handness::Enum HandnessT>
-	inline void mtxProj_impl(float* _result, float _fovy, float _aspect, float _near, float _far, bool _oglNdc = false)
-	{
-		const float height = 1.0f/tanf(toRad(_fovy)*0.5f);
-		const float width  = height * 1.0f/_aspect;
-		mtxProjXYWH<HandnessT>(_result, 0.0f, 0.0f, width, height, _near, _far, _oglNdc);
-	}
+	
 
 	inline void mtxProj(float* _result, float _ut, float _dt, float _lt, float _rt, float _near, float _far, bool _oglNdc = false)
 	{
@@ -1281,10 +1394,7 @@ namespace bx
 		mtxProj_impl<Handness::Left>(_result, _fov, _near, _far, _oglNdc);
 	}
 
-	inline void mtxProjLh(float* _result, float _fovy, float _aspect, float _near, float _far, bool _oglNdc = false)
-	{
-		mtxProj_impl<Handness::Left>(_result, _fovy, _aspect, _near, _far, _oglNdc);
-	}
+	
 
 	inline void mtxProjRh(float* _result, float _ut, float _dt, float _lt, float _rt, float _near, float _far, bool _oglNdc = false)
 	{
@@ -1656,13 +1766,7 @@ namespace bx
 		_result[2] = _vec[0] * _mat[ 2] + _vec[1] * _mat[6] + _vec[2] * _mat[10] + _mat[14];
 	}
     
-    inline void vec2PointMulMtx(float* __restrict _result, const float* __restrict _vec, const float* __restrict _mat)
-    {
-        _result[0] = _vec[0] * _mat[ 0] + _vec[1] * _mat[ 2];
-        _result[1] = _vec[0] * _mat[ 4] + _vec[1] * _mat[ 6] + _vec[2] * _mat[5];
-        
-        
-    }
+    
 
 	inline void vec3MulMtxH(float* __restrict _result, const float* __restrict _vec, const float* __restrict _mat)
 	{
@@ -1676,13 +1780,7 @@ namespace bx
 		_result[2] = zz*invW;
 	}
 
-	inline void vec4MulMtx(float* __restrict _result, const float* __restrict _vec, const float* __restrict _mat)
-	{
-		_result[0] = _vec[0] * _mat[ 0] + _vec[1] * _mat[4] + _vec[2] * _mat[ 8] + _vec[3] * _mat[12];
-		_result[1] = _vec[0] * _mat[ 1] + _vec[1] * _mat[5] + _vec[2] * _mat[ 9] + _vec[3] * _mat[13];
-		_result[2] = _vec[0] * _mat[ 2] + _vec[1] * _mat[6] + _vec[2] * _mat[10] + _vec[3] * _mat[14];
-		_result[3] = _vec[0] * _mat[ 3] + _vec[1] * _mat[7] + _vec[2] * _mat[11] + _vec[3] * _mat[15];
-	}
+	
 
 	inline void mtxMul(float* __restrict _result, const float* __restrict _a, const float* __restrict _b)
 	{
@@ -1744,53 +1842,7 @@ namespace bx
 		_result[8] = +(xx*yy - xy*yx) * invDet;
 	}
 
-	inline void mtxInverse(float* __restrict _result, const float* __restrict _a)
-	{
-		float xx = _a[ 0];
-		float xy = _a[ 1];
-		float xz = _a[ 2];
-		float xw = _a[ 3];
-		float yx = _a[ 4];
-		float yy = _a[ 5];
-		float yz = _a[ 6];
-		float yw = _a[ 7];
-		float zx = _a[ 8];
-		float zy = _a[ 9];
-		float zz = _a[10];
-		float zw = _a[11];
-		float wx = _a[12];
-		float wy = _a[13];
-		float wz = _a[14];
-		float ww = _a[15];
-
-		float det = 0.0f;
-		det += xx * (yy*(zz*ww - zw*wz) - yz*(zy*ww - zw*wy) + yw*(zy*wz - zz*wy) );
-		det -= xy * (yx*(zz*ww - zw*wz) - yz*(zx*ww - zw*wx) + yw*(zx*wz - zz*wx) );
-		det += xz * (yx*(zy*ww - zw*wy) - yy*(zx*ww - zw*wx) + yw*(zx*wy - zy*wx) );
-		det -= xw * (yx*(zy*wz - zz*wy) - yy*(zx*wz - zz*wx) + yz*(zx*wy - zy*wx) );
-
-		float invDet = 1.0f/det;
-
-		_result[ 0] = +(yy*(zz*ww - wz*zw) - yz*(zy*ww - wy*zw) + yw*(zy*wz - wy*zz) ) * invDet;
-		_result[ 1] = -(xy*(zz*ww - wz*zw) - xz*(zy*ww - wy*zw) + xw*(zy*wz - wy*zz) ) * invDet;
-		_result[ 2] = +(xy*(yz*ww - wz*yw) - xz*(yy*ww - wy*yw) + xw*(yy*wz - wy*yz) ) * invDet;
-		_result[ 3] = -(xy*(yz*zw - zz*yw) - xz*(yy*zw - zy*yw) + xw*(yy*zz - zy*yz) ) * invDet;
-
-		_result[ 4] = -(yx*(zz*ww - wz*zw) - yz*(zx*ww - wx*zw) + yw*(zx*wz - wx*zz) ) * invDet;
-		_result[ 5] = +(xx*(zz*ww - wz*zw) - xz*(zx*ww - wx*zw) + xw*(zx*wz - wx*zz) ) * invDet;
-		_result[ 6] = -(xx*(yz*ww - wz*yw) - xz*(yx*ww - wx*yw) + xw*(yx*wz - wx*yz) ) * invDet;
-		_result[ 7] = +(xx*(yz*zw - zz*yw) - xz*(yx*zw - zx*yw) + xw*(yx*zz - zx*yz) ) * invDet;
-
-		_result[ 8] = +(yx*(zy*ww - wy*zw) - yy*(zx*ww - wx*zw) + yw*(zx*wy - wx*zy) ) * invDet;
-		_result[ 9] = -(xx*(zy*ww - wy*zw) - xy*(zx*ww - wx*zw) + xw*(zx*wy - wx*zy) ) * invDet;
-		_result[10] = +(xx*(yy*ww - wy*yw) - xy*(yx*ww - wx*yw) + xw*(yx*wy - wx*yy) ) * invDet;
-		_result[11] = -(xx*(yy*zw - zy*yw) - xy*(yx*zw - zx*yw) + xw*(yx*zy - zx*yy) ) * invDet;
-
-		_result[12] = -(yx*(zy*wz - wy*zz) - yy*(zx*wz - wx*zz) + yz*(zx*wy - wx*zy) ) * invDet;
-		_result[13] = +(xx*(zy*wz - wy*zz) - xy*(zx*wz - wx*zz) + xz*(zx*wy - wx*zy) ) * invDet;
-		_result[14] = -(xx*(yy*wz - wy*yz) - xy*(yx*wz - wx*yz) + xz*(yx*wy - wx*yy) ) * invDet;
-		_result[15] = +(xx*(yy*zz - zy*yz) - xy*(yx*zz - zx*yz) + xz*(yx*zy - zx*yy) ) * invDet;
-	}
+	
 
 	/// Convert LH to RH projection matrix and vice versa.
 	inline void mtxProjFlipHandedness(float* __restrict _dst, const float* __restrict _src)
@@ -1981,5 +2033,179 @@ namespace bx
 } // namespace bx
 
 #endif // BX_FPU_MATH_H_HEADER_GUARD
+
+
+
+#ifndef BX_FLOAT4X4_H_HEADER_GUARD
+#define BX_FLOAT4X4_H_HEADER_GUARD
+
+#include "simd_t.h"
+
+namespace bx
+{
+	BX_ALIGN_DECL_16(struct) float4x4_t
+	{
+		simd128_t col[4];
+	};
+
+	BX_SIMD_FORCE_INLINE simd128_t simd_mul_xyz1(simd128_t _a, const float4x4_t* _b)
+	{
+		const simd128_t xxxx   = simd_swiz_xxxx(_a);
+		const simd128_t yyyy   = simd_swiz_yyyy(_a);
+		const simd128_t zzzz   = simd_swiz_zzzz(_a);
+		const simd128_t col0   = simd_mul(_b->col[0], xxxx);
+		const simd128_t col1   = simd_mul(_b->col[1], yyyy);
+		const simd128_t col2   = simd_madd(_b->col[2], zzzz, col0);
+		const simd128_t col3   = simd_add(_b->col[3], col1);
+		const simd128_t result = simd_add(col2, col3);
+
+		return result;
+	}
+
+	BX_SIMD_FORCE_INLINE simd128_t simd_mul(simd128_t _a, const float4x4_t* _b)
+	{
+		const simd128_t xxxx   = simd_swiz_xxxx(_a);
+		const simd128_t yyyy   = simd_swiz_yyyy(_a);
+		const simd128_t zzzz   = simd_swiz_zzzz(_a);
+		const simd128_t wwww   = simd_swiz_wwww(_a);
+		const simd128_t col0   = simd_mul(_b->col[0], xxxx);
+		const simd128_t col1   = simd_mul(_b->col[1], yyyy);
+		const simd128_t col2   = simd_madd(_b->col[2], zzzz, col0);
+		const simd128_t col3   = simd_madd(_b->col[3], wwww, col1);
+		const simd128_t result = simd_add(col2, col3);
+
+		return result;
+	}
+
+	BX_SIMD_INLINE void float4x4_mul_scalar(float4x4_t* __restrict _result, const float4x4_t* __restrict _a, float scalar)
+	{
+		simd128_t b = simd_splat(scalar);
+		_result->col[0] = simd_mul(_a->col[0], b);
+		_result->col[1] = simd_mul(_a->col[1], b);
+		_result->col[2] = simd_mul(_a->col[2], b);
+		_result->col[3] = simd_mul(_a->col[3], b);
+	}
+
+	BX_SIMD_INLINE void float4x4_mul(float4x4_t* __restrict _result, const float4x4_t* __restrict _a, const float4x4_t* __restrict _b)
+	{
+		_result->col[0] = simd_mul(_a->col[0], _b);
+		_result->col[1] = simd_mul(_a->col[1], _b);
+		_result->col[2] = simd_mul(_a->col[2], _b);
+		_result->col[3] = simd_mul(_a->col[3], _b);
+	}
+
+	BX_SIMD_INLINE void float4x4_add(float4x4_t* __restrict _result, const float4x4_t* __restrict _a, const float4x4_t* __restrict _b)
+	{
+		_result->col[0] = simd_add(_a->col[0], _b->col[0]);
+		_result->col[1] = simd_add(_a->col[1], _b->col[1]);
+		_result->col[2] = simd_add(_a->col[2], _b->col[2]);
+		_result->col[3] = simd_add(_a->col[3], _b->col[3]);
+	}
+
+	BX_SIMD_FORCE_INLINE void float4x4_transpose(float4x4_t* __restrict _result, const float4x4_t* __restrict _mtx)
+	{
+		const simd128_t aibj = simd_shuf_xAyB(_mtx->col[0], _mtx->col[2]); // aibj
+		const simd128_t emfn = simd_shuf_xAyB(_mtx->col[1], _mtx->col[3]); // emfn
+		const simd128_t ckdl = simd_shuf_zCwD(_mtx->col[0], _mtx->col[2]); // ckdl
+		const simd128_t gohp = simd_shuf_zCwD(_mtx->col[1], _mtx->col[3]); // gohp
+		_result->col[0] = simd_shuf_xAyB(aibj, emfn); // aeim
+		_result->col[1] = simd_shuf_zCwD(aibj, emfn); // bfjn
+		_result->col[2] = simd_shuf_xAyB(ckdl, gohp); // cgko
+		_result->col[3] = simd_shuf_zCwD(ckdl, gohp); // dhlp
+	}
+
+	BX_SIMD_INLINE void float4x4_inverse(float4x4_t* __restrict _result, const float4x4_t* __restrict _a)
+	{
+		const simd128_t tmp0 = simd_shuf_xAzC(_a->col[0], _a->col[1]);
+		const simd128_t tmp1 = simd_shuf_xAzC(_a->col[2], _a->col[3]);
+		const simd128_t tmp2 = simd_shuf_yBwD(_a->col[0], _a->col[1]);
+		const simd128_t tmp3 = simd_shuf_yBwD(_a->col[2], _a->col[3]);
+		const simd128_t t0   = simd_shuf_xyAB(tmp0, tmp1);
+		const simd128_t t1   = simd_shuf_xyAB(tmp3, tmp2);
+		const simd128_t t2   = simd_shuf_zwCD(tmp0, tmp1);
+		const simd128_t t3   = simd_shuf_zwCD(tmp3, tmp2);
+
+		const simd128_t t23 = simd_mul(t2, t3);
+		const simd128_t t23_yxwz = simd_swiz_yxwz(t23);
+		const simd128_t t23_wzyx = simd_swiz_wzyx(t23);
+
+		simd128_t cof0, cof1, cof2, cof3;
+
+		const simd128_t zero = simd_zero();
+		cof0 = simd_nmsub(t1, t23_yxwz, zero);
+		cof0 = simd_madd(t1, t23_wzyx, cof0);
+
+		cof1 = simd_nmsub(t0, t23_yxwz, zero);
+		cof1 = simd_madd(t0, t23_wzyx, cof1);
+		cof1 = simd_swiz_zwxy(cof1);
+
+		const simd128_t t12 = simd_mul(t1, t2);
+		const simd128_t t12_yxwz = simd_swiz_yxwz(t12);
+		const simd128_t t12_wzyx = simd_swiz_wzyx(t12);
+
+		cof0 = simd_madd(t3, t12_yxwz, cof0);
+		cof0 = simd_nmsub(t3, t12_wzyx, cof0);
+
+		cof3 = simd_mul(t0, t12_yxwz);
+		cof3 = simd_nmsub(t0, t12_wzyx, cof3);
+		cof3 = simd_swiz_zwxy(cof3);
+
+		const simd128_t t1_zwxy = simd_swiz_zwxy(t1);
+		const simd128_t t2_zwxy = simd_swiz_zwxy(t2);
+
+		const simd128_t t13 = simd_mul(t1_zwxy, t3);
+		const simd128_t t13_yxwz = simd_swiz_yxwz(t13);
+		const simd128_t t13_wzyx = simd_swiz_wzyx(t13);
+
+		cof0 = simd_madd(t2_zwxy, t13_yxwz, cof0);
+		cof0 = simd_nmsub(t2_zwxy, t13_wzyx, cof0);
+
+		cof2 = simd_mul(t0, t13_yxwz);
+		cof2 = simd_nmsub(t0, t13_wzyx, cof2);
+		cof2 = simd_swiz_zwxy(cof2);
+
+		const simd128_t t01 = simd_mul(t0, t1);
+		const simd128_t t01_yxwz = simd_swiz_yxwz(t01);
+		const simd128_t t01_wzyx = simd_swiz_wzyx(t01);
+
+		cof2 = simd_nmsub(t3, t01_yxwz, cof2);
+		cof2 = simd_madd(t3, t01_wzyx, cof2);
+
+		cof3 = simd_madd(t2_zwxy, t01_yxwz, cof3);
+		cof3 = simd_nmsub(t2_zwxy, t01_wzyx, cof3);
+
+		const simd128_t t03 = simd_mul(t0, t3);
+		const simd128_t t03_yxwz = simd_swiz_yxwz(t03);
+		const simd128_t t03_wzyx = simd_swiz_wzyx(t03);
+
+		cof1 = simd_nmsub(t2_zwxy, t03_yxwz, cof1);
+		cof1 = simd_madd(t2_zwxy, t03_wzyx, cof1);
+
+		cof2 = simd_madd(t1, t03_yxwz, cof2);
+		cof2 = simd_nmsub(t1, t03_wzyx, cof2);
+
+		const simd128_t t02 = simd_mul(t0, t2_zwxy);
+		const simd128_t t02_yxwz = simd_swiz_yxwz(t02);
+		const simd128_t t02_wzyx = simd_swiz_wzyx(t02);
+
+		cof1 = simd_madd(t3, t02_yxwz, cof1);
+		cof1 = simd_nmsub(t3, t02_wzyx, cof1);
+
+		cof3 = simd_nmsub(t1, t02_yxwz, cof3);
+		cof3 = simd_madd(t1, t02_wzyx, cof3);
+
+		const simd128_t det    = simd_dot(t0, cof0);
+		const simd128_t invdet = simd_rcp(det);
+
+		_result->col[0] = simd_mul(cof0, invdet);
+		_result->col[1] = simd_mul(cof1, invdet);
+		_result->col[2] = simd_mul(cof2, invdet);
+		_result->col[3] = simd_mul(cof3, invdet);
+	}
+
+} // namespace bx
+
+#endif // BX_FLOAT4X4_H_HEADER_GUARD
+
 
 */
