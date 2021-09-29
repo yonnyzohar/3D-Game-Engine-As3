@@ -1,4 +1,11 @@
-﻿package {
+﻿/*
+ * Copyright 2011-2016 Branimir Karadzic. All rights reserved.
+ * License: https://github.com/bkaradzic/bx#license-bsd-2-clause
+ */
+
+
+
+package {
 
 	public class EngineMath {
 		
@@ -420,11 +427,6 @@
 
 }
 
-/*
- * Copyright 2011-2016 Branimir Karadzic. All rights reserved.
- * License: https://github.com/bkaradzic/bx#license-bsd-2-clause
- */
-/*
 
 public static function float4x4_mul_scalar(float4x4_t* __restrict _result, const float4x4_t* __restrict _a, float scalar)
 		{
@@ -443,7 +445,7 @@ public static function vec2PointMulMtx(float* __restrict _result, const float* _
 			
 			
 		}
-
+/*
 namespace bx
 {
 	static const float pi     = 3.14159265358979323846f;
