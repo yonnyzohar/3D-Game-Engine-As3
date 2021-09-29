@@ -427,7 +427,7 @@ package {
 
 }
 
-
+/*
 public static function float4x4_mul_scalar(float4x4_t* __restrict _result, const float4x4_t* __restrict _a, float scalar)
 		{
 			simd128_t b = simd_splat(scalar);
@@ -445,7 +445,7 @@ public static function vec2PointMulMtx(float* __restrict _result, const float* _
 			
 			
 		}
-/*
+
 namespace bx
 {
 	static const float pi     = 3.14159265358979323846f;
