@@ -20,42 +20,67 @@
 			Q: false
 		};
 		private var counter: Number = 0;
-		private var position: Point3d;
-		private var rotation: Quaternion;
-		private var scale: Vector3;
+		private var iterator:int = 0;
+
+		public var position: Point3d;
+		public var positionMinusZ:Point3d;
+		public var rotation: Quaternion;
+		public var scale: Vector3;
+
 		private var currTime: Number;
 		private var prevTime: Number;
 		public var transformMatrix: Matrix4x4;
 		private var theStage: Stage;
 		public static var zNear;
 		public static var zFar = 10000;
-		private static var fieldOfView: Number = 45;
+		private static var fieldOfView: Number = 30;
 		public var aspectRatio:Number ;
 		public var fovY:Number;
+		private var lastMouseX:Number = 0;
+		private var lastMouseY:Number = 0;
+		private var mouseIsDown:Boolean = false;
+		private var prevEpoch:Number;
+		var date:Date;
 
 		public function Camera(_theStage: Stage, _position: Point3d, _rotation: Quaternion) {
 			// constructor code
+			date = new Date();
 			theStage = _theStage;
 			position = _position;
 			rotation = _rotation;
 			scale = new Vector3(1, 1, 1);
 			_theStage.addEventListener(KeyboardEvent.KEY_DOWN, myKeyDown);
 			_theStage.addEventListener(KeyboardEvent.KEY_UP, myKeyUp);
+			_theStage.addEventListener(MouseEvent.MOUSE_DOWN, mouseDown);
+			_theStage.addEventListener(MouseEvent.MOUSE_UP, mouseUp);
 			currTime = getTimer();
 			prevTime = getTimer();
 			transformMatrix = new Matrix4x4();
 			transformMatrix.createFromTransform(position, rotation, scale);
 			zNear = (Engine.resolutionX / 2.0) / Math.tan(EngineMath.degreesToRad(fieldOfView / 2.0));
+			trace(zNear);
 			aspectRatio = Engine.resolutionX / Engine.resolutionY;
 			
 			//get the field of view from top to bottom
 			var oneDivAspectRatio:Number = 1.0/aspectRatio;
 			fovY = 2 * Math.atan(Math.tan(EngineMath.degreesToRad(fieldOfView) / 2.0) * oneDivAspectRatio);
 
+
+			positionMinusZ = new Point3d(position.x, position.y, position.z - zNear);
+
+		}
+	
+		private function mouseDown(e:MouseEvent):void{
+			mouseIsDown = true;
+		}
+		
+		private function mouseUp(e:MouseEvent):void{
+			mouseIsDown = false;
 		}
 
+
 		public function getPosition(): Point3d {
-			return position;
+			return positionMinusZ;
 		}
 
 		public function getRotation(): Quaternion {
@@ -67,56 +92,96 @@
 		public function update(): void {
 
 			currTime = getTimer();
+			var epoch:Number = date.time;
+			
 			var elapsedTime: Number = currTime - prevTime;
+			var elapsedEpoch: Number = epoch - prevEpoch;
+			
+			
 			var COS: Number;
 			var SIN: Number;
 			var MATH_DEG_TO_RAD: Number = 0.0174532925;
 			var moveVector: Point3d;
 			var quat1: Quaternion;
+			
+			if(elapsedTime < .1)
+			{
+				elapsedTime = .1;
+			}
+			
+			var ms:Number = Engine.moveSpeed * elapsedTime;
+			var rs:Number = Engine.rotateSpeed * elapsedTime;
 
-			//If you''re wondering how I got this, I derived it from quaternion to matrix conversion code. I took the matrix form and multiplied by the vectors (0,0,1) (0,1,0) and (1,0,0) to get these simplified forms.
 
-			//up vector
-			//position.x += 2 * (rotation.x*rotation.y - rotation.w*rotation.z)
-			//position.y += 1 - 2 * (rotation.x*rotation.x + rotation.z*rotation.z)
-			//position.z += 2 * (rotation.y*rotation.z + rotation.w*rotation.x)
-
-			elapsedTime = 1;
 
 			if (Model.W) {
 
-				position.x += 2 * (rotation.x * rotation.z + rotation.w * rotation.y);
-				position.y += 2 * (rotation.y * rotation.z - rotation.w * rotation.x);
-				position.z += 1 - 2 * (rotation.x * rotation.x + rotation.y * rotation.y);
+				var deltaX:Number = ms * (rotation.x * rotation.z + rotation.w * rotation.y);
+				var deltaY:Number = ms * (rotation.y * rotation.z - rotation.w * rotation.x);
+				var deltaZ:Number = (ms/2) - ms * (rotation.x * rotation.x + rotation.y * rotation.y);
+				position.x += deltaX;
+				position.y += deltaY;
+				position.z += deltaZ;
 
+				positionMinusZ.x += deltaX;
+				positionMinusZ.y += deltaY;
+				positionMinusZ.z += deltaZ;
 			}
 
 			if (Model.S) {
 
-				position.x -= 2 * (rotation.x * rotation.z + rotation.w * rotation.y);
-				position.y -= 2 * (rotation.y * rotation.z - rotation.w * rotation.x);
-				position.z -= 1 - 2 * (rotation.x * rotation.x + rotation.y * rotation.y);
+				var deltaX:Number = ms * (rotation.x * rotation.z + rotation.w * rotation.y);
+				var deltaY:Number = ms * (rotation.y * rotation.z - rotation.w * rotation.x);
+				var deltaZ:Number = (ms/2) - ms * (rotation.x * rotation.x + rotation.y * rotation.y);
+
+				position.x -= deltaX;
+				position.y -= deltaY;
+				position.z -= deltaZ;
+
+				positionMinusZ.x -= deltaX;
+				positionMinusZ.y -= deltaY;
+				positionMinusZ.z -= deltaZ;
+				
 			}
 
 			if (Model.A) {
 				//strafe left
 				//left vector
-				position.x -= 1 - 2 * (rotation.y * rotation.y + rotation.z * rotation.z);
-				position.y -= 2 * (rotation.x * rotation.y + rotation.w * rotation.z);
-				position.z -= 2 * (rotation.x * rotation.z - rotation.w * rotation.y);
+				var deltaX:Number = (ms/2) - ms * (rotation.y * rotation.y + rotation.z * rotation.z);
+				var deltaY:Number = ms * (rotation.x * rotation.y + rotation.w * rotation.z);
+				var deltaZ:Number = ms * (rotation.x * rotation.z - rotation.w * rotation.y);
+
+				position.x -= deltaX;
+				position.y -= deltaY;
+				position.z -= deltaZ;
+
+				positionMinusZ.x -= deltaX;
+				positionMinusZ.y -= deltaY;
+				positionMinusZ.z -= deltaZ;
+				
 			}
 
 			if (Model.D) {
-				position.x += 1 - 2 * (rotation.y * rotation.y + rotation.z * rotation.z);
-				position.y += 2 * (rotation.x * rotation.y + rotation.w * rotation.z);
-				position.z += 2 * (rotation.x * rotation.z - rotation.w * rotation.y);
+
+				var deltaX:Number = (ms/2) - ms * (rotation.y * rotation.y + rotation.z * rotation.z);
+				var deltaY:Number = ms * (rotation.x * rotation.y + rotation.w * rotation.z);
+				var deltaZ:Number = ms * (rotation.x * rotation.z - rotation.w * rotation.y);
+
+				position.x += deltaX;
+				position.y += deltaY;
+				position.z += deltaZ;
+
+				positionMinusZ.x += deltaX;
+				positionMinusZ.y += deltaY;
+				positionMinusZ.z += deltaZ;
+				
 			}
 
 			if (Model.up) {
 				//rotation.x -= Engine.rotateSpeed;
 
 				//var quat:Quaternion = Engine.eulerToQuat(rotation);
-				moveVector = new Point3d(-Engine.rotateSpeed * MATH_DEG_TO_RAD, 0, 0);
+				moveVector = new Point3d(-rs * MATH_DEG_TO_RAD, 0, 0);
 				quat1 = EngineMath.eulerToQuat(moveVector);
 				rotation = EngineMath.quatMul(rotation, quat1);
 				//rotation = Engine.quatToEuler(res);
@@ -128,7 +193,7 @@
 				//rotation.x += Engine.rotateSpeed;
 
 				//var quat:Quaternion  = Engine.eulerToQuat(rotation);
-				moveVector = new Point3d(Engine.rotateSpeed * MATH_DEG_TO_RAD, 0, 0);
+				moveVector = new Point3d(rs * MATH_DEG_TO_RAD, 0, 0);
 				quat1 = EngineMath.eulerToQuat(moveVector);
 				rotation = EngineMath.quatMul(rotation, quat1);
 				//rotation = Engine.quatToEuler(res);
@@ -140,7 +205,7 @@
 				//rotation.y += Engine.rotateSpeed * elapsedTime;
 
 				//var quat:Quaternion  = Engine.eulerToQuat(rotation);
-				moveVector = new Point3d(0, Engine.rotateSpeed * MATH_DEG_TO_RAD, 0);
+				moveVector = new Point3d(0, rs * MATH_DEG_TO_RAD, 0);
 				quat1 = EngineMath.eulerToQuat(moveVector);
 				rotation = EngineMath.quatMul(rotation, quat1);
 				//rotation = Engine.quatToEuler(res);
@@ -152,7 +217,7 @@
 				//rotation.y -= Engine.rotateSpeed * elapsedTime;
 
 				//var quat:Quaternion  = Engine.eulerToQuat(rotation);
-				moveVector = new Point3d(0, -Engine.rotateSpeed * MATH_DEG_TO_RAD, 0);
+				moveVector = new Point3d(0, -rs * MATH_DEG_TO_RAD, 0);
 				quat1 = EngineMath.eulerToQuat(moveVector);
 				rotation = EngineMath.quatMul(rotation, quat1);
 				//rotation = Engine.quatToEuler(res);
@@ -163,7 +228,7 @@
 				//rotation.y -= Engine.rotateSpeed * elapsedTime;
 
 				//var quat:Quaternion  = Engine.eulerToQuat(rotation);
-				moveVector = new Point3d(0, 0, -Engine.rotateSpeed * MATH_DEG_TO_RAD);
+				moveVector = new Point3d(0, 0, -rs * MATH_DEG_TO_RAD);
 				quat1 = EngineMath.eulerToQuat(moveVector);
 				rotation = EngineMath.quatMul(rotation, quat1);
 				//rotation = Engine.quatToEuler(res);
@@ -174,31 +239,68 @@
 				//rotation.y -= Engine.rotateSpeed * elapsedTime;
 
 				//var quat:Quaternion  = Engine.eulerToQuat(rotation);
-				moveVector = new Point3d(0, 0, Engine.rotateSpeed * MATH_DEG_TO_RAD);
+				moveVector = new Point3d(0, 0, rs * MATH_DEG_TO_RAD);
 				quat1 = EngineMath.eulerToQuat(moveVector);
 				rotation = EngineMath.quatMul(rotation, quat1);
 				//rotation = Engine.quatToEuler(res);
 				/**/
 			}
+			
+			
 
 			/**/
 			prevTime = currTime;
-			transformMatrix.createFromTransform(position, rotation, scale);
+			prevEpoch = epoch;
 			
-			if(counter % 10 == 0)
-			{
-				var pos:Vector3 = Engine.unprojectCoordinate(this, theStage.mouseX, Engine.resolutionY - theStage.mouseY, 0.05);
-				//trace(pos.x, pos.y, pos.z);
-				//trace(position.x, position.y, position.z, "", rotation.x, rotation.y, rotation.z, rotation.w);
-				cameraLookAt(pos);
-			}
+		
 			
-			
-			counter++;
-			
+			//trace("pos: ", position.x, position.y, position.z, "rotation:", rotation.x, rotation.y, rotation.z, rotation.w);
+			var angleStep:Number = .2;
+			var mouseSensitivity:Number = .2;
+
+
 			
 			//cameraLookAt(
 			//stage.removeEventListener(Event.ENTER_FRAME, update);
+			var mousePosX:Number = theStage.mouseX - (theStage.stageWidth/2);
+			var mousePosY:Number = theStage.mouseY - (theStage.stageHeight/2); 
+
+			if(mouseIsDown)
+			{
+				if (Math.abs(mousePosX - lastMouseX) > 0  && Math.abs(mousePosY - lastMouseY) > 0)
+				{
+					var p:Point3d =new Point3d(0, EngineMath.degreesToRad(mousePosX * angleStep * mouseSensitivity), 0);
+					var quat1:Quaternion = EngineMath.eulerToQuat(p);
+					rotation = EngineMath.quatMul(rotation, quat1);
+				
+					var p2:Point3d =new Point3d(EngineMath.degreesToRad(mousePosY * angleStep * mouseSensitivity),0 , 0);
+					var quat2:Quaternion = EngineMath.eulerToQuat(p2);
+					//rotation = EngineMath.quatMul(rotation, quat2);		
+				}
+
+			}
+
+			
+
+			lastMouseX = mousePosX;
+			lastMouseY = mousePosY;
+
+			transformMatrix.createFromTransform(position, rotation, scale);
+
+            /*
+				shaker::Quaternion rotation = transformManager->rotation(inst);
+                shaker::Quaternion quat1;
+                
+                bx::EulerToQuat(quat1.val, 0, MATH_DEG_TO_RAD(g_mouseOffset.x * angleStep * mouseSensitivity), 0);
+                bx::quatMul(&rotation.x, &rotation.x, &quat1.x);
+                
+                bx::EulerToQuat(quat1.val, MATH_DEG_TO_RAD(g_mouseOffset.y * angleStep * mouseSensitivity),0 , 0);
+                bx::quatMul(&rotation.x, &rotation.x, &quat1.x);
+                
+                transformManager->setRotation(inst, rotation);
+
+
+            */
 
 		}
 

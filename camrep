@@ -1,0 +1,282 @@
+
+/*
+#include "worldCamera.h"
+#include "rendererWorld.h"
+#include "CameraComponentManager.h"
+#include "TransformComponentManager.h"
+
+namespace shaker
+{
+    void getActiveCameraPosition(World3D* world, Vector3* outPosition)
+    {
+        Entity cameraEnt = world->m_cameraManager->getActiveCamera();
+        TransformComponentManager::Instance inst = world->m_transformManager->lookup(cameraEnt);
+        //*outPosition = world->m_transformManager->position(inst);
+        const Matrix4x4 worldTransform = world->m_transformManager->worldTransform(inst);
+        outPosition->x = worldTransform.un.val[12];
+        outPosition->y = worldTransform.un.val[13];
+        outPosition->z = worldTransform.un.val[14];
+    }
+    
+    
+    
+    void getProjectionMatrixFromCameraSpec(const CameraSpec* cameraSpec, Matrix4x4* projMat)
+    {
+        if (cameraSpec->m_type == 1)
+        {
+            //if the camera aspect ratio is 0 we want to get it from screen
+            bool isFitToScreen = cameraSpec->m_aspectRatio <= 0;
+            float aspectRatio = cameraSpec->m_aspectRatio;
+            
+            if (isFitToScreen)
+            {
+                aspectRatio = (float)gameplay::Game::getInstance()->getWidth() / (float)gameplay::Game::getInstance()->getHeight();
+            }
+            bx::mtxProjLh(projMat->un.val, cameraSpec->m_fovY, aspectRatio, cameraSpec->m_znear, cameraSpec->m_zfar);
+            
+        }
+        else
+        {
+            bool isPixelPerfectProj = !(cameraSpec->m_fovY > 0);
+            bool isFitToScreen = cameraSpec->m_aspectRatio <= 0;
+            // change ortho projection params based on current screen resolution - we do that if fovy is set to 0
+            if (isPixelPerfectProj)
+            {
+                int32_t widthDiv2 = gameplay::Game::getInstance()->getWidth() * 0.5;
+                int32_t heightDive2 = gameplay::Game::getInstance()->getHeight()* 0.5;
+                bx::mtxOrthoLh(projMat->un.val, -widthDiv2, widthDiv2, -heightDive2, heightDive2, cameraSpec->m_znear, cameraSpec->m_zfar);
+            }
+            else if (isFitToScreen)
+            {
+                
+                float screenAspectRatio = (float)gameplay::Game::getInstance()->getWidth() / (float)gameplay::Game::getInstance()->getHeight();
+                
+                float zoomY = cameraSpec->m_zoomY;
+                float zoomX = zoomY * screenAspectRatio;
+                
+                bx::mtxOrthoLh(projMat->un.val, -zoomX, zoomX,  -zoomY, zoomY, cameraSpec->m_znear, cameraSpec->m_zfar);
+            }
+            else
+            {
+                bx::mtxOrthoLh(projMat->un.val, -cameraSpec->m_zoomX, cameraSpec->m_zoomX,  -cameraSpec->m_zoomY, cameraSpec->m_zoomY, cameraSpec->m_znear, cameraSpec->m_zfar);
+            }
+        }
+    }
+    
+    void screenPointToWorld(World3D* world, Entity cameraEnt, uint32_t x, uint32_t y)
+    {
+        
+    }
+    
+    
+    
+    void setOrthoCameraZoom(World3D* world, Entity cameraEnt, float zoomFactor)
+    {
+        CameraComponentManager::Instance inst = world->m_cameraManager->lookup(cameraEnt);
+        if (inst.isValid())
+        {
+            world->m_cameraManager->setCameraZoomY(inst, zoomFactor);
+            
+        }
+    }
+    
+    void getCameraMatrices(World3D* world, Entity cameraEnt, Matrix4x4* proj, Matrix4x4* view)
+    {
+        
+        TransformComponentManager::Instance inst = world->m_transformManager->lookup(cameraEnt);
+        if (inst.isValid())
+        {
+            Matrix4x4 cameraTransform = world->m_transformManager->worldTransform(inst);
+            bx::mtxInverse(view->un.val, cameraTransform.un.val);
+            const CameraSpec* spec = world->m_cameraManager->getCameraSpec(world->m_cameraManager->getActiveCameraInstance());
+            getProjectionMatrixFromCameraSpec(spec, proj);
+        }
+    }
+    
+    void getActiveCameraMatrices(World3D* world, Matrix4x4* proj, Matrix4x4* view)
+    {
+        Entity cameraEnt = world->m_cameraManager->getActiveCamera();
+        getCameraMatrices(world, cameraEnt, proj, view);
+    }
+    
+    inline float getDepthFromDistance(float distFromCamera, float zNear, float zFar)
+    {
+        float depth = (distFromCamera - zNear)/(zFar - zNear);
+        return depth;
+    }
+    
+    
+     * D = distance From Camera
+     * Zn, ZF
+     *  depth = (D-Zn)/ (Zf-Zn) - 0-1 range
+    
+    void unprojectScreenCoordinats(const gameplay::Rectangle& viewport, float x, float y, float depth, const Matrix4x4& view,
+                                   const Matrix4x4& proj,
+                                   Vector3* dst)
+    {
+        GP_ASSERT(dst);
+        
+        // Create our screen space position in NDC.
+        GP_ASSERT(viewport.width != 0.0f && viewport.height != 0.0f);
+        Vector4 screen;
+        screen.x = (x - viewport.x) / viewport.width;
+        screen.y = ((viewport.height - y) - viewport.y) / viewport.height;
+        // depth between 0-1
+        screen.z = depth;
+        screen.w = 1.0f;
+        
+        // Map to range -1 to 1.
+        screen.x = screen.x * 2.0f - 1.0f;
+        screen.y = screen.y * 2.0f - 1.0f;
+        screen.z = screen.z * 2.0f - 1.0f;
+        
+        // Transform the screen-space NDC by our inverse view projection matrix.
+        Matrix4x4 viewProj;
+        bx::float4x4_mul(&viewProj.un.f4x4
+                         , &view.un.f4x4
+                         , &proj.un.f4x4);
+        Matrix4x4 invViewProj;
+        
+        bx::mtxInverse(invViewProj.un.val, viewProj.un.val);
+        Vector4 res;
+        bx::vec4MulMtx(res.val, screen.val, invViewProj.un.val);
+        // Divide by our W coordinate.
+        if (res.w != 0.0f)
+        {
+            res.x /= res.w;
+            res.y /= res.w;
+            res.z /= res.w;
+        }
+        
+        dst->x = res.x;
+        dst->y = res.y;
+        dst->z = res.z;
+    }
+
+	//accepts x,y points on screen and a depth 0-1 and puts answer on outPosition
+    bool unprojectPointToWorld(float x, float y, float depth, World world, Vector3* outPosition)
+    {
+        World3D* world3D = getWorld3DImplFromWorld(world);
+        
+        if (world3D)
+        {
+            Matrix4x4 proj;
+            Matrix4x4 view;
+            
+            getActiveCameraMatrices(world3D, &proj, &view);
+            
+            gameplay::Rectangle viewPort;
+            viewPort.x = 0;
+            viewPort.y = 0;
+            viewPort.width = gameplay::Game::getInstance()->getWidth();
+            viewPort.height = gameplay::Game::getInstance()->getHeight();
+            unprojectScreenCoordinats(viewPort, x, y, depth, view, proj, outPosition);
+            return true;
+            
+        }
+        
+        return false;
+    }
+
+    void unprojectPointToWorldZeroPlane(float x, float y, World3D* world3D, gameplay::Rectangle& viewPort, const Matrix4x4& projMat, const Matrix4x4& viewMat, Vector3* outPosition)
+    {
+       
+        Vector3 nearPlane;
+        Vector3 farPlane;
+        // unproject the far and near clipping plane and found
+        unprojectScreenCoordinats(viewPort, x, y, 0.0f, viewMat, projMat, &nearPlane);
+        unprojectScreenCoordinats(viewPort, x, y, 1.0f, viewMat, projMat, &farPlane);
+        
+        float depthRange = farPlane.y - nearPlane.y;
+        float xRange = farPlane.x - nearPlane.x;
+        float zRange = farPlane.z - nearPlane.z;
+        
+        float groundDepthPercentage = ABS(nearPlane.y) / ABS(depthRange);
+        
+        float xAtGroundDepth = (groundDepthPercentage * xRange) + nearPlane.x;
+        float zAtGroundDepth = (groundDepthPercentage * zRange) + nearPlane.z;
+        
+        outPosition->x = xAtGroundDepth;
+        outPosition->y = 0;
+        outPosition->z = zAtGroundDepth;
+            
+        
+    }
+
+    bool unprojectPointToWorldZeroPlane(float x, float y, World world, Vector3* outPosition)
+    {
+        World3D* world3D = getWorld3DImplFromWorld(world);
+        
+        if (world3D)
+        {
+            Matrix4x4 proj;
+            Matrix4x4 view;
+            
+            getActiveCameraMatrices(world3D, &proj, &view);
+            
+            gameplay::Rectangle viewPort;
+            viewPort.x = 0;
+            viewPort.y = 0;
+            viewPort.width = gameplay::Game::getInstance()->getWidth();
+            viewPort.height = gameplay::Game::getInstance()->getHeight();
+            unprojectPointToWorldZeroPlane(x, y, world3D, viewPort, proj, view, outPosition);
+            
+            return true;
+            
+        }
+        
+        return false;
+    }
+
+    void projectWorldPositionToScreen(World3D* world3D, const Matrix4x4& viewProj, float view_x,
+                                      float view_y, float view_width, float view_height, Vector3* point, ShakerPoint* outScreenPos)
+    {
+        bx::simd128_t projectedPoint = bx::simd_ld(point->x, point->y, point->z, 1.0f);
+        projectedPoint = bx::simd_mul(projectedPoint, &viewProj.un.f4x4);
+        
+        
+        float res[4] ALIGN_16;
+        bx::simd_st(res, projectedPoint);
+        // devide projected point by w to get point in Normalized clip space (-1 - 1 in opengl)
+        res[0] /= res[3];
+        res[1] /= res[3];
+        // convert to 0-2
+        res[0] += 1;
+        res[1] += 1;
+        // convert to 0-1
+        res[0] *= 0.5;
+        res[1] *= 0.5;
+        // multiply by view port size
+        res[0] *= view_width;
+        res[1] *= view_height;
+        
+        
+        outScreenPos->x = view_x + res[0];
+        outScreenPos->y = view_y + view_height - res[1];
+    }
+
+    void projectWorldPositionToScreen(World world, Vector3* point, ShakerPoint* outScreenPos)
+    {
+        World3D* world3D = getWorld3DImplFromWorld(world);
+        
+        if (world3D)
+        {
+            
+            
+            Matrix4x4 proj;
+            Matrix4x4 view;
+            Matrix4x4 viewProj;
+            getActiveCameraMatrices(world3D, &proj, &view);
+
+            bx::float4x4_mul(&viewProj.un.f4x4
+                             , &view.un.f4x4
+                             , &proj.un.f4x4
+                             );
+            
+            projectWorldPositionToScreen(world3D, viewProj, 0, 0, gameplay::Game::getInstance()->getWidth(), gameplay::Game::getInstance()->getHeight(), point, outScreenPos);
+        }
+    }
+
+}
+
+*/

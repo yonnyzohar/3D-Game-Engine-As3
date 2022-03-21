@@ -13,20 +13,24 @@
 
 
 		public static var moveSpeed: Number = 2;
-		public static var rotateSpeed: Number = 2;
+		public static var rotateSpeed: Number = .1;
 
-		private var gameObjects: Array = [];
+		protected var gameObjects: Array = [];
 
 		private var camera: Camera;
 
 		private var bmp: Bitmap;
 		public static var bd: BitmapData;
 		private var zBuffer: Array = [];
+		
+		public static var gO:Array ;
 
+		public static var activeCamera:Camera;
 
 
 		public function Engine() {
 			// constructor code
+			//stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
 			resolutionX = stage.stageWidth;
 			resolutionY = stage.stageHeight;
 
@@ -35,34 +39,20 @@
 			bmp = new Bitmap(bd);
 			stage.addChild(bmp);
 
-			var arr: Array = [new Img0(), new Img1(), new Img2(), new Img3()];
-			var position: Point3d = new Point3d(600, 600, 5000);
-			var rotation: Quaternion = new Quaternion(0, 0, 0, 1);
-			var scale: Point3d = new Point3d(1, 1, 1);
-			//var cube: Cube = new Cube(position, rotation, scale, arr[int(Math.random() * arr.length)])
-			//gameObjects.push(cube);
-			//gameObjects.push(new Plane(position, rotation, scale, arr[0]));
+			//var arr: Array = [new Img0(), new Img1(), new Img2(), new Img3(), new Img4, new Img5()];
 
-			/**/
-			var dist: int = 2000;
-			for (var _y: int = 0; _y < 5; _y++) {
-				for (var _z: int = 0; _z < 5; _z++) {
-					for (var _x: int = 0; _x < 5; _x++) {
-						position = new Point3d(_x * dist, _y * dist, dist * _z);
-						rotation = new Quaternion(Math.random(), Math.random(), Math.random(), 1);
-						scale = new Point3d(1, 1, 1);
-						gameObjects.push(new Cube(position, rotation, scale, arr[int(Math.random() * arr.length)]));
-					}
-				}
-			}
+			
+			
+			Engine.gO = gameObjects;
 
 
-
-			//new Point3d(0, 0, -100), new Quaternion(0, 0, 0, 1)
-			var camPos: Point3d = new Point3d(-3205.284990943313, -3536.4845982178817, -4027.9614941237405);
-			var camRot: Quaternion = new Quaternion(-0.16317591100567008, 0.3368240884762062, 0.059391174481627555, 0.9254165785652491);
+			var camPos: Point3d = new Point3d(0, 0, 0);
+			var camRot: Quaternion = new Quaternion(0, 0, 0, 1);
+			//var camPos: Point3d = new Point3d(-3205.284990943313, -3536.4845982178817, -4027.9614941237405);
+			//var camRot: Quaternion = new Quaternion(-0.16317591100567008, 0.3368240884762062, 0.059391174481627555, 0.9254165785652491);
 
 			camera = new Camera(stage, camPos, camRot);
+			activeCamera = camera;
 
 			stage.addEventListener(Event.ENTER_FRAME, update);
 
@@ -76,6 +66,10 @@
 			for (i = 0; i < resolutionX * resolutionY; i++) {
 				zBuffer[i] = 0;
 			}
+			
+			//trace(stage.mouseX,  stage.mouseY, pos.x, pos.y, pos.z);
+			
+			
 
 			Engine.bd.fillRect(new Rectangle(0, 0, resolutionX, resolutionY), 0x000000);
 
@@ -95,6 +89,7 @@
 
 				}
 			}
+		
 
 			//sorting by average z will solve most z index issues but not all
 			//totalPolygonsPreClip.sortOn("averageZ", Array.NUMERIC | Array.DESCENDING);//, 
@@ -102,13 +97,14 @@
 			var totalPolygons: Array = [];
 			for (var j: int = 0; j < totalPolygonsPreClip.length; j++) {
 				var polygon: Polygon = totalPolygonsPreClip[j];
-
+				
 				var clippedTriangles: Array = polygon.getZClippedTriangles();
+
 				for (var h: int = 0; h < clippedTriangles.length; h++) {
 					totalPolygons.push(clippedTriangles[h]);
 				}
-				/**/
 			}
+			
 
 			//we still need to render only the polygons facing us
 			//we created the polygon indices in clockwise order sow we can check who is facing us and who is not
@@ -116,13 +112,21 @@
 			for (i = 0; i < totalPolygons.length; i++) {
 				var polygon: Polygon = totalPolygons[i];
 				polygon.calculateScreenPos();
-				if (polygon.normalZ < 0) {
+				/**/
+				//if z is negative that means the polygon is facing us
+				if (polygon.normalZ < 0) //
+				{
 					var clippedPolygons: Array = polygon.getClippedTriangles();
 					for (var j: int = 0; j < clippedPolygons.length; j++) {
 						clippedPolygons[j].draw(zBuffer);
 					}
 
 				}
+				else
+				{
+					
+				}
+				
 
 			}
 			Engine.bd.unlock();
@@ -226,14 +230,15 @@
 
 		public static function applyPerspective(orig: Point3d): Point3d {
 			var zNear: Number = Camera.zNear;
-			var returnX: Number = orig.x * zNear / (zNear + orig.z);
-			var returnY: Number = orig.y * zNear / (zNear + orig.z);
+			var scale:Number = (zNear / (zNear + orig.z));
+			var returnX: Number = orig.x * scale;
+			var returnY: Number = orig.y * scale;
 			var returnZ: Number = orig.z;
 
 			//this is to fix texture warping
-			var returnU: Number = orig.u * zNear / (zNear + orig.z);
-			var returnV: Number = orig.v * zNear / (zNear + orig.z);
-			var returnW: Number = orig.w * zNear / (zNear + orig.z);
+			var returnU: Number = orig.u * scale;
+			var returnV: Number = orig.v * scale;
+			var returnW: Number = orig.w * scale;
 
 			var newPoint: Point3d = new Point3d(returnX, returnY, returnZ, returnU, returnV);
 			newPoint.w = returnW;

@@ -129,8 +129,8 @@
 			//we are going to go over the points and fill in the shape, line by line from left to right
 			sortPoints();
 
-			fillTriangle(zBuffer);
-			//drawWireFrame();
+			//fillTriangle(zBuffer);
+			drawWireFrame();
 
 		}
 
@@ -194,8 +194,10 @@
 			//each triangle is split in 2 to make calculations easier.
 			//first we do the top part, then the bottom part
 			if (p0y < p1y) {
+
+				var leftYDiff: Number = (p1y - p0y)
 				//slope from top to first side
-				var slope1: Number = (p1x - p0x) / (p1y - p0y);
+				var slope1: Number = (p1x - p0x) / leftYDiff;
 				//slope from top to second side
 				var slope2: Number = (p2x - p0x) / (p2y - p0y);
 				var triangleHeight: Number = p1y - p0y;
@@ -205,9 +207,9 @@
 					var _y: int = p0y + i;
 
 					//u start and v start
-					var us: Number = p0u + (_y - p0y) / (p1y - p0y) * (p1u - p0u);
-					var vs: Number = p0v + (_y - p0y) / (p1y - p0y) * (p1v - p0v);
-					var ws: Number = p0w + (_y - p0y) / (p1y - p0y) * (p1w - p0w);
+					var us: Number = p0u + (_y - p0y) / leftYDiff * (p1u - p0u);
+					var vs: Number = p0v + (_y - p0y) / leftYDiff * (p1v - p0v);
+					var ws: Number = p0w + (_y - p0y) / leftYDiff * (p1w - p0w);
 
 					//u end and v end
 					var ue: Number = p0u + (_y - p0y) / (p2y - p0y) * (p2u - p0u);
@@ -215,7 +217,7 @@
 					var we: Number = p0w + (_y - p0y) / (p2y - p0y) * (p2w - p0w);
 
 					//z buffer start and end
-					var zs: Number = p0z + (_y - p0y) / (p1y - p0y) * (p1z - p0z);
+					var zs: Number = p0z + (_y - p0y) / leftYDiff * (p1z - p0z);
 					var ze: Number = p0z + (_y - p0y) / (p2y - p0y) * (p2z - p0z);
 
 
@@ -419,22 +421,33 @@
 				}
 				//if there are no points outside the screen, return the original triangle bank in
 				if (outsidePoints.length == 0) {
+					
 					toReturn.push(new Polygon(screenPositions[0], screenPositions[1], screenPositions[2], bd));
 
 				} //if one point is outside the screen, make up 2 new triangles from the remaining area - > study this code!
+				//what this code does it get the point that is to the left of the screen and sets it x as 0.
+				//then it needs to find the corresponding y. y is just the distance from x to the left edge of the screen * the slope!! (y/x)
+				//only the y is really imporant for creating the new polygon. the u & v are for texturing correctly
 				else if (outsidePoints.length == 1) {
+					
 					var extraPoint1: Point3d = new Point3d(0, 0, 0, 0, 0);
 					extraPoint1.x = 0;
-					extraPoint1.y = outsidePoints[0].y + (0 - outsidePoints[0].x) * (insidePoints[0].y - outsidePoints[0].y) / (insidePoints[0].x - outsidePoints[0].x);
-					extraPoint1.z = outsidePoints[0].z + (0 - outsidePoints[0].x) * (insidePoints[0].z - outsidePoints[0].z) / (insidePoints[0].x - outsidePoints[0].x);
+					var ySlopefromPoint0ToOffScreenPoint: Number = (insidePoints[0].y - outsidePoints[0].y) / (insidePoints[0].x - outsidePoints[0].x);
+
+
+					extraPoint1.y = outsidePoints[0].y + (0 - outsidePoints[0].x) * ySlopefromPoint0ToOffScreenPoint;
+					//extraPoint1.z = outsidePoints[0].z + (0 - outsidePoints[0].x) * (insidePoints[0].z - outsidePoints[0].z) / (insidePoints[0].x - outsidePoints[0].x);
 					extraPoint1.u = outsidePoints[0].u + (0 - outsidePoints[0].x) * (insidePoints[0].u - outsidePoints[0].u) / (insidePoints[0].x - outsidePoints[0].x);
 					extraPoint1.v = outsidePoints[0].v + (0 - outsidePoints[0].x) * (insidePoints[0].v - outsidePoints[0].v) / (insidePoints[0].x - outsidePoints[0].x);
 					extraPoint1.w = outsidePoints[0].w + (0 - outsidePoints[0].x) * (insidePoints[0].w - outsidePoints[0].w) / (insidePoints[0].x - outsidePoints[0].x);
 
 					var extraPoint2: Point3d = new Point3d(0, 0, 0, 0, 0);
 					extraPoint2.x = 0;
-					extraPoint2.y = outsidePoints[0].y + (0 - outsidePoints[0].x) * (insidePoints[1].y - outsidePoints[0].y) / (insidePoints[1].x - outsidePoints[0].x);
-					extraPoint2.z = outsidePoints[0].z + (0 - outsidePoints[0].x) * (insidePoints[1].z - outsidePoints[0].z) / (insidePoints[1].x - outsidePoints[0].x);
+					var ySlopefromPoint1ToOffScreenPoint: Number = (insidePoints[1].y - outsidePoints[0].y) / (insidePoints[1].x - outsidePoints[0].x);
+
+					extraPoint2.y = outsidePoints[0].y + (0 - outsidePoints[0].x) * ySlopefromPoint1ToOffScreenPoint;
+					//extraPoint2.z = outsidePoints[0].z + (0 - outsidePoints[0].x) * (insidePoints[1].z - outsidePoints[0].z) / (insidePoints[1].x - outsidePoints[0].x);
+
 					extraPoint2.u = outsidePoints[0].u + (0 - outsidePoints[0].x) * (insidePoints[1].u - outsidePoints[0].u) / (insidePoints[1].x - outsidePoints[0].x);
 					extraPoint2.v = outsidePoints[0].v + (0 - outsidePoints[0].x) * (insidePoints[1].v - outsidePoints[0].v) / (insidePoints[1].x - outsidePoints[0].x);
 					extraPoint2.w = outsidePoints[0].w + (0 - outsidePoints[0].x) * (insidePoints[1].w - outsidePoints[0].w) / (insidePoints[1].x - outsidePoints[0].x);
@@ -445,18 +458,23 @@
 
 				} //if there are 2 points outside the screen, make up 2 new triangles from the remaining area - > study this code!
 				else if (outsidePoints.length == 2) {
+					
 					var extraPoint1: Point3d = new Point3d(0, 0, 0, 0, 0);
 					extraPoint1.x = 0;
-					extraPoint1.y = outsidePoints[0].y + (0 - outsidePoints[0].x) * (insidePoints[0].y - outsidePoints[0].y) / (insidePoints[0].x - outsidePoints[0].x);
-					extraPoint1.z = outsidePoints[0].z + (0 - outsidePoints[0].x) * (insidePoints[0].z - outsidePoints[0].z) / (insidePoints[0].x - outsidePoints[0].x);
+					var ySlopefromPoint0ToOffScreenPoint:Number = (insidePoints[0].y - outsidePoints[0].y) / (insidePoints[0].x - outsidePoints[0].x);
+					extraPoint1.y = outsidePoints[0].y + (0 - outsidePoints[0].x) * ySlopefromPoint0ToOffScreenPoint;
+
+					//extraPoint1.z = outsidePoints[0].z + (0 - outsidePoints[0].x) * (insidePoints[0].z - outsidePoints[0].z) / (insidePoints[0].x - outsidePoints[0].x);
 					extraPoint1.u = outsidePoints[0].u + (0 - outsidePoints[0].x) * (insidePoints[0].u - outsidePoints[0].u) / (insidePoints[0].x - outsidePoints[0].x);
 					extraPoint1.v = outsidePoints[0].v + (0 - outsidePoints[0].x) * (insidePoints[0].v - outsidePoints[0].v) / (insidePoints[0].x - outsidePoints[0].x);
 					extraPoint1.w = outsidePoints[0].w + (0 - outsidePoints[0].x) * (insidePoints[0].w - outsidePoints[0].w) / (insidePoints[0].x - outsidePoints[0].x);
 
 					var extraPoint2: Point3d = new Point3d(0, 0, 0, 0, 0);
 					extraPoint2.x = 0;
-					extraPoint2.y = outsidePoints[1].y + (0 - outsidePoints[1].x) * (insidePoints[0].y - outsidePoints[1].y) / (insidePoints[0].x - outsidePoints[1].x);
-					extraPoint2.z = outsidePoints[1].z + (0 - outsidePoints[1].x) * (insidePoints[0].z - outsidePoints[1].z) / (insidePoints[0].x - outsidePoints[1].x);
+					var ySlopefromPoint1ToOffScreenPoint:Number = (insidePoints[0].y - outsidePoints[1].y) / (insidePoints[0].x - outsidePoints[1].x);
+					extraPoint2.y = outsidePoints[1].y + (0 - outsidePoints[1].x) * ySlopefromPoint1ToOffScreenPoint;
+
+					//extraPoint2.z = outsidePoints[1].z + (0 - outsidePoints[1].x) * (insidePoints[0].z - outsidePoints[1].z) / (insidePoints[0].x - outsidePoints[1].x);
 					extraPoint2.u = outsidePoints[1].u + (0 - outsidePoints[1].x) * (insidePoints[0].u - outsidePoints[1].u) / (insidePoints[0].x - outsidePoints[1].x);
 					extraPoint2.v = outsidePoints[1].v + (0 - outsidePoints[1].x) * (insidePoints[0].v - outsidePoints[1].v) / (insidePoints[0].x - outsidePoints[1].x);
 					extraPoint2.w = outsidePoints[1].w + (0 - outsidePoints[1].x) * (insidePoints[0].w - outsidePoints[1].w) / (insidePoints[0].x - outsidePoints[1].x);
@@ -474,21 +492,22 @@
 				insidePoints.splice(0);
 				outsidePoints.splice(0);
 				for (var j: int = 0; j < 3; j++) {
-					if (currentTriangle.getScreenPositions()[j].x >= Engine.resolutionX) {
+					var _x:int = currentTriangle.getScreenPositions()[j].x;
+					//trace(_x, Engine.resolutionX);
+					if (_x >= Engine.resolutionX) {
 						outsidePoints.push(currentTriangle.getScreenPositions()[j]);
 					} else {
 						insidePoints.push(currentTriangle.getScreenPositions()[j]);
 					}
-
 				}
-
 				if (outsidePoints.length == 0) {
 					toReturn.push(new Polygon(insidePoints[0], insidePoints[1], insidePoints[2], bd));
 				} else if (outsidePoints.length == 1) {
 					var extraPoint1: Point3d = new Point3d(0, 0, 0, 0, 0);
 					extraPoint1.x = Engine.resolutionX - 1;
 					extraPoint1.y = outsidePoints[0].y + (Engine.resolutionX - 1 - outsidePoints[0].x) * (insidePoints[0].y - outsidePoints[0].y) / (insidePoints[0].x - outsidePoints[0].x);
-					extraPoint1.z = outsidePoints[0].z + (Engine.resolutionX - 1 - outsidePoints[0].x) * (insidePoints[0].z - outsidePoints[0].z) / (insidePoints[0].x - outsidePoints[0].x);
+
+					//extraPoint1.z = outsidePoints[0].z + (Engine.resolutionX - 1 - outsidePoints[0].x) * (insidePoints[0].z - outsidePoints[0].z) / (insidePoints[0].x - outsidePoints[0].x);
 					extraPoint1.u = outsidePoints[0].u + (Engine.resolutionX - 1 - outsidePoints[0].x) * (insidePoints[0].u - outsidePoints[0].u) / (insidePoints[0].x - outsidePoints[0].x);
 					extraPoint1.v = outsidePoints[0].v + (Engine.resolutionX - 1 - outsidePoints[0].x) * (insidePoints[0].v - outsidePoints[0].v) / (insidePoints[0].x - outsidePoints[0].x);
 					extraPoint1.w = outsidePoints[0].w + (Engine.resolutionX - 1 - outsidePoints[0].x) * (insidePoints[0].w - outsidePoints[0].w) / (insidePoints[0].x - outsidePoints[0].x);
@@ -496,7 +515,8 @@
 					var extraPoint2: Point3d = new Point3d(0, 0, 0, 0, 0);
 					extraPoint2.x = Engine.resolutionX - 1;
 					extraPoint2.y = outsidePoints[0].y + (Engine.resolutionX - 1 - outsidePoints[0].x) * (insidePoints[1].y - outsidePoints[0].y) / (insidePoints[1].x - outsidePoints[0].x);
-					extraPoint2.z = outsidePoints[0].z + (Engine.resolutionX - 1 - outsidePoints[0].x) * (insidePoints[1].z - outsidePoints[0].z) / (insidePoints[1].x - outsidePoints[0].x);
+
+					//extraPoint2.z = outsidePoints[0].z + (Engine.resolutionX - 1 - outsidePoints[0].x) * (insidePoints[1].z - outsidePoints[0].z) / (insidePoints[1].x - outsidePoints[0].x);
 					extraPoint2.u = outsidePoints[0].u + (Engine.resolutionX - 1 - outsidePoints[0].x) * (insidePoints[1].u - outsidePoints[0].u) / (insidePoints[1].x - outsidePoints[0].x);
 					extraPoint2.v = outsidePoints[0].v + (Engine.resolutionX - 1 - outsidePoints[0].x) * (insidePoints[1].v - outsidePoints[0].v) / (insidePoints[1].x - outsidePoints[0].x);
 					extraPoint2.w = outsidePoints[0].w + (Engine.resolutionX - 1 - outsidePoints[0].x) * (insidePoints[1].w - outsidePoints[0].w) / (insidePoints[1].x - outsidePoints[0].x);
@@ -509,7 +529,8 @@
 					var extraPoint1: Point3d = new Point3d(0, 0, 0, 0, 0);
 					extraPoint1.x = Engine.resolutionX - 1;
 					extraPoint1.y = outsidePoints[0].y + (Engine.resolutionX - 1 - outsidePoints[0].x) * (insidePoints[0].y - outsidePoints[0].y) / (insidePoints[0].x - outsidePoints[0].x);
-					extraPoint1.z = outsidePoints[0].z + (Engine.resolutionX - 1 - outsidePoints[0].x) * (insidePoints[0].z - outsidePoints[0].z) / (insidePoints[0].x - outsidePoints[0].x);
+
+					//extraPoint1.z = outsidePoints[0].z + (Engine.resolutionX - 1 - outsidePoints[0].x) * (insidePoints[0].z - outsidePoints[0].z) / (insidePoints[0].x - outsidePoints[0].x);
 					extraPoint1.u = outsidePoints[0].u + (Engine.resolutionX - 1 - outsidePoints[0].x) * (insidePoints[0].u - outsidePoints[0].u) / (insidePoints[0].x - outsidePoints[0].x);
 					extraPoint1.v = outsidePoints[0].v + (Engine.resolutionX - 1 - outsidePoints[0].x) * (insidePoints[0].v - outsidePoints[0].v) / (insidePoints[0].x - outsidePoints[0].x);
 					extraPoint1.w = outsidePoints[0].w + (Engine.resolutionX - 1 - outsidePoints[0].x) * (insidePoints[0].w - outsidePoints[0].w) / (insidePoints[0].x - outsidePoints[0].x);
@@ -517,7 +538,8 @@
 					var extraPoint2: Point3d = new Point3d(0, 0, 0, 0, 0);
 					extraPoint2.x = Engine.resolutionX - 1;
 					extraPoint2.y = outsidePoints[1].y + (Engine.resolutionX - 1 - outsidePoints[1].x) * (insidePoints[0].y - outsidePoints[1].y) / (insidePoints[0].x - outsidePoints[1].x);
-					extraPoint2.z = outsidePoints[1].z + (Engine.resolutionX - 1 - outsidePoints[1].x) * (insidePoints[0].z - outsidePoints[1].z) / (insidePoints[0].x - outsidePoints[1].x);
+
+					//extraPoint2.z = outsidePoints[1].z + (Engine.resolutionX - 1 - outsidePoints[1].x) * (insidePoints[0].z - outsidePoints[1].z) / (insidePoints[0].x - outsidePoints[1].x);
 					extraPoint2.u = outsidePoints[1].u + (Engine.resolutionX - 1 - outsidePoints[1].x) * (insidePoints[0].u - outsidePoints[1].u) / (insidePoints[0].x - outsidePoints[1].x);
 					extraPoint2.v = outsidePoints[1].v + (Engine.resolutionX - 1 - outsidePoints[1].x) * (insidePoints[0].v - outsidePoints[1].v) / (insidePoints[0].x - outsidePoints[1].x);
 					extraPoint2.w = outsidePoints[1].w + (Engine.resolutionX - 1 - outsidePoints[1].x) * (insidePoints[0].w - outsidePoints[1].w) / (insidePoints[0].x - outsidePoints[1].x);
@@ -551,7 +573,8 @@
 					var extraPoint1: Point3d = new Point3d(0, 0, 0, 0, 0);
 					extraPoint1.x = outsidePoints[0].x - outsidePoints[0].y * (insidePoints[0].x - outsidePoints[0].x) / (insidePoints[0].y - outsidePoints[0].y);
 					extraPoint1.y = 0;
-					extraPoint1.z = outsidePoints[0].z - outsidePoints[0].y * (insidePoints[0].z - outsidePoints[0].z) / (insidePoints[0].y - outsidePoints[0].y);
+
+					//extraPoint1.z = outsidePoints[0].z - outsidePoints[0].y * (insidePoints[0].z - outsidePoints[0].z) / (insidePoints[0].y - outsidePoints[0].y);
 					extraPoint1.u = outsidePoints[0].u - outsidePoints[0].y * (insidePoints[0].u - outsidePoints[0].u) / (insidePoints[0].y - outsidePoints[0].y);
 					extraPoint1.v = outsidePoints[0].v - outsidePoints[0].y * (insidePoints[0].v - outsidePoints[0].v) / (insidePoints[0].y - outsidePoints[0].y);
 					extraPoint1.w = outsidePoints[0].w - outsidePoints[0].y * (insidePoints[0].w - outsidePoints[0].w) / (insidePoints[0].y - outsidePoints[0].y);
@@ -559,7 +582,8 @@
 					var extraPoint2: Point3d = new Point3d(0, 0, 0, 0, 0);
 					extraPoint2.x = outsidePoints[0].x - outsidePoints[0].y * (insidePoints[1].x - outsidePoints[0].x) / (insidePoints[1].y - outsidePoints[0].y);
 					extraPoint2.y = 0;
-					extraPoint2.z = outsidePoints[0].z - outsidePoints[0].y * (insidePoints[1].z - outsidePoints[0].z) / (insidePoints[1].y - outsidePoints[0].y);
+
+					//extraPoint2.z = outsidePoints[0].z - outsidePoints[0].y * (insidePoints[1].z - outsidePoints[0].z) / (insidePoints[1].y - outsidePoints[0].y);
 					extraPoint2.u = outsidePoints[0].u - outsidePoints[0].y * (insidePoints[1].u - outsidePoints[0].u) / (insidePoints[1].y - outsidePoints[0].y);
 					extraPoint2.v = outsidePoints[0].v - outsidePoints[0].y * (insidePoints[1].v - outsidePoints[0].v) / (insidePoints[1].y - outsidePoints[0].y);
 					extraPoint2.w = outsidePoints[0].w - outsidePoints[0].y * (insidePoints[1].w - outsidePoints[0].w) / (insidePoints[1].y - outsidePoints[0].y);
@@ -572,7 +596,8 @@
 					var extraPoint1: Point3d = new Point3d(0, 0, 0, 0, 0);
 					extraPoint1.x = outsidePoints[0].x - outsidePoints[0].y * (insidePoints[0].x - outsidePoints[0].x) / (insidePoints[0].y - outsidePoints[0].y);
 					extraPoint1.y = 0;
-					extraPoint1.z = outsidePoints[0].z - outsidePoints[0].y * (insidePoints[0].z - outsidePoints[0].z) / (insidePoints[0].y - outsidePoints[0].y);
+
+					//extraPoint1.z = outsidePoints[0].z - outsidePoints[0].y * (insidePoints[0].z - outsidePoints[0].z) / (insidePoints[0].y - outsidePoints[0].y);
 					extraPoint1.u = outsidePoints[0].u - outsidePoints[0].y * (insidePoints[0].u - outsidePoints[0].u) / (insidePoints[0].y - outsidePoints[0].y);
 					extraPoint1.v = outsidePoints[0].v - outsidePoints[0].y * (insidePoints[0].v - outsidePoints[0].v) / (insidePoints[0].y - outsidePoints[0].y);
 					extraPoint1.w = outsidePoints[0].w - outsidePoints[0].y * (insidePoints[0].w - outsidePoints[0].w) / (insidePoints[0].y - outsidePoints[0].y);
@@ -580,7 +605,8 @@
 					var extraPoint2: Point3d = new Point3d(0, 0, 0, 0, 0);
 					extraPoint2.x = outsidePoints[1].x - outsidePoints[1].y * (insidePoints[0].x - outsidePoints[1].x) / (insidePoints[0].y - outsidePoints[1].y);
 					extraPoint2.y = 0;
-					extraPoint2.z = outsidePoints[1].z - outsidePoints[1].y * (insidePoints[0].z - outsidePoints[1].z) / (insidePoints[0].y - outsidePoints[1].y);
+
+					//extraPoint2.z = outsidePoints[1].z - outsidePoints[1].y * (insidePoints[0].z - outsidePoints[1].z) / (insidePoints[0].y - outsidePoints[1].y);
 					extraPoint2.u = outsidePoints[1].u - outsidePoints[1].y * (insidePoints[0].u - outsidePoints[1].u) / (insidePoints[0].y - outsidePoints[1].y);
 					extraPoint2.v = outsidePoints[1].v - outsidePoints[1].y * (insidePoints[0].v - outsidePoints[1].v) / (insidePoints[0].y - outsidePoints[1].y);
 					extraPoint2.w = outsidePoints[1].w - outsidePoints[1].y * (insidePoints[0].w - outsidePoints[1].w) / (insidePoints[0].y - outsidePoints[1].y);
@@ -613,7 +639,8 @@
 					var extraPoint1: Point3d = new Point3d(0, 0, 0, 0, 0);
 					extraPoint1.x = outsidePoints[0].x + (Engine.resolutionY - 1 - outsidePoints[0].y) * (insidePoints[0].x - outsidePoints[0].x) / (insidePoints[0].y - outsidePoints[0].y);
 					extraPoint1.y = Engine.resolutionY - 1;
-					extraPoint1.z = outsidePoints[0].z + (Engine.resolutionY - 1 - outsidePoints[0].y) * (insidePoints[0].z - outsidePoints[0].z) / (insidePoints[0].y - outsidePoints[0].y);
+
+					//extraPoint1.z = outsidePoints[0].z + (Engine.resolutionY - 1 - outsidePoints[0].y) * (insidePoints[0].z - outsidePoints[0].z) / (insidePoints[0].y - outsidePoints[0].y);
 					extraPoint1.u = outsidePoints[0].u + (Engine.resolutionY - 1 - outsidePoints[0].y) * (insidePoints[0].u - outsidePoints[0].u) / (insidePoints[0].y - outsidePoints[0].y);
 					extraPoint1.v = outsidePoints[0].v + (Engine.resolutionY - 1 - outsidePoints[0].y) * (insidePoints[0].v - outsidePoints[0].v) / (insidePoints[0].y - outsidePoints[0].y);
 					extraPoint1.w = outsidePoints[0].w + (Engine.resolutionY - 1 - outsidePoints[0].y) * (insidePoints[0].w - outsidePoints[0].w) / (insidePoints[0].y - outsidePoints[0].y);
@@ -621,7 +648,8 @@
 					var extraPoint2: Point3d = new Point3d(0, 0, 0, 0, 0);
 					extraPoint2.x = outsidePoints[0].x + (Engine.resolutionY - 1 - outsidePoints[0].y) * (insidePoints[1].x - outsidePoints[0].x) / (insidePoints[1].y - outsidePoints[0].y);
 					extraPoint2.y = Engine.resolutionY - 1;
-					extraPoint2.z = outsidePoints[0].z + (Engine.resolutionY - 1 - outsidePoints[0].y) * (insidePoints[1].z - outsidePoints[0].z) / (insidePoints[1].y - outsidePoints[0].y);
+
+					//extraPoint2.z = outsidePoints[0].z + (Engine.resolutionY - 1 - outsidePoints[0].y) * (insidePoints[1].z - outsidePoints[0].z) / (insidePoints[1].y - outsidePoints[0].y);
 					extraPoint2.u = outsidePoints[0].u + (Engine.resolutionY - 1 - outsidePoints[0].y) * (insidePoints[1].u - outsidePoints[0].u) / (insidePoints[1].y - outsidePoints[0].y);
 					extraPoint2.v = outsidePoints[0].v + (Engine.resolutionY - 1 - outsidePoints[0].y) * (insidePoints[1].v - outsidePoints[0].v) / (insidePoints[1].y - outsidePoints[0].y);
 					extraPoint2.w = outsidePoints[0].w + (Engine.resolutionY - 1 - outsidePoints[0].y) * (insidePoints[1].w - outsidePoints[0].w) / (insidePoints[1].y - outsidePoints[0].y);
@@ -634,7 +662,8 @@
 					var extraPoint1: Point3d = new Point3d(0, 0, 0, 0, 0);
 					extraPoint1.x = outsidePoints[0].x + (Engine.resolutionY - 1 - outsidePoints[0].y) * (insidePoints[0].x - outsidePoints[0].x) / (insidePoints[0].y - outsidePoints[0].y);
 					extraPoint1.y = Engine.resolutionY - 1;
-					extraPoint1.z = outsidePoints[0].z + (Engine.resolutionY - 1 - outsidePoints[0].y) * (insidePoints[0].z - outsidePoints[0].z) / (insidePoints[0].y - outsidePoints[0].y);
+
+					//extraPoint1.z = outsidePoints[0].z + (Engine.resolutionY - 1 - outsidePoints[0].y) * (insidePoints[0].z - outsidePoints[0].z) / (insidePoints[0].y - outsidePoints[0].y);
 					extraPoint1.u = outsidePoints[0].u + (Engine.resolutionY - 1 - outsidePoints[0].y) * (insidePoints[0].u - outsidePoints[0].u) / (insidePoints[0].y - outsidePoints[0].y);
 					extraPoint1.v = outsidePoints[0].v + (Engine.resolutionY - 1 - outsidePoints[0].y) * (insidePoints[0].v - outsidePoints[0].v) / (insidePoints[0].y - outsidePoints[0].y);
 					extraPoint1.w = outsidePoints[0].w + (Engine.resolutionY - 1 - outsidePoints[0].y) * (insidePoints[0].w - outsidePoints[0].w) / (insidePoints[0].y - outsidePoints[0].y);
@@ -642,7 +671,8 @@
 					var extraPoint2: Point3d = new Point3d(0, 0, 0, 0, 0);
 					extraPoint2.x = outsidePoints[1].x + (Engine.resolutionY - 1 - outsidePoints[1].y) * (insidePoints[0].x - outsidePoints[1].x) / (insidePoints[0].y - outsidePoints[1].y);
 					extraPoint2.y = Engine.resolutionY - 1;
-					extraPoint2.z = outsidePoints[1].z + (Engine.resolutionY - 1 - outsidePoints[1].y) * (insidePoints[0].z - outsidePoints[1].z) / (insidePoints[0].y - outsidePoints[1].y);
+
+					//extraPoint2.z = outsidePoints[1].z + (Engine.resolutionY - 1 - outsidePoints[1].y) * (insidePoints[0].z - outsidePoints[1].z) / (insidePoints[0].y - outsidePoints[1].y);
 					extraPoint2.u = outsidePoints[1].u + (Engine.resolutionY - 1 - outsidePoints[1].y) * (insidePoints[0].u - outsidePoints[1].u) / (insidePoints[0].y - outsidePoints[1].y);
 					extraPoint2.v = outsidePoints[1].v + (Engine.resolutionY - 1 - outsidePoints[1].y) * (insidePoints[0].v - outsidePoints[1].v) / (insidePoints[0].y - outsidePoints[1].y);
 					extraPoint2.w = outsidePoints[1].w + (Engine.resolutionY - 1 - outsidePoints[1].y) * (insidePoints[0].w - outsidePoints[1].w) / (insidePoints[0].y - outsidePoints[1].y);
@@ -675,8 +705,9 @@
 
 				var pointsAreOutside: Array = [];
 				for (var j: int = 0; j < 3; j++) {
-					pointsAreOutside[j] = currentTriangle.getCameraPositions()[j].z < 0;
+					pointsAreOutside[j] = currentTriangle.getCameraPositions()[j].z < 0;//0(-Camera.zNear * 0.1)
 					if (pointsAreOutside[j]) {
+
 						outsidePoints.push(currentTriangle.getCameraPositions()[j]);
 					} else {
 						insidePoints.push(currentTriangle.getCameraPositions()[j]);
@@ -687,7 +718,6 @@
 				if (outsidePoints.length == 0) {
 					toReturn.push(new Polygon(insidePoints[0], insidePoints[1], insidePoints[2], bd));
 				} else if (outsidePoints.length == 1) {
-
 					var extraPoint1: Point3d = new Point3d(0, 0, 0, 0, 0);
 					extraPoint1.x = outsidePoints[0].x + (0 - outsidePoints[0].z) * (insidePoints[0].x - outsidePoints[0].x) / (insidePoints[0].z - outsidePoints[0].z);
 					extraPoint1.y = outsidePoints[0].y + (0 - outsidePoints[0].z) * (insidePoints[0].y - outsidePoints[0].y) / (insidePoints[0].z - outsidePoints[0].z);

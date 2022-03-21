@@ -235,7 +235,8 @@ package {
 
 			var dX: Number = p1.x - p2.x;
 			var dY: Number = p1.y - p2.y;
-			var dist: Number = Math.sqrt(dX * dX + dY * dY);
+			var dZ: Number = p1.z - p2.z;
+			var dist: Number = Math.sqrt((dX * dX) + (dY * dY) + (dZ * dZ));
 			return dist;
 		}
 
