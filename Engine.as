@@ -17,7 +17,7 @@
 
 		protected var gameObjects: Array = [];
 
-		private var camera: Camera;
+		protected var camera: Camera;
 
 		private var bmp: Bitmap;
 		public static var bd: BitmapData;
@@ -44,20 +44,29 @@
 			
 			
 			Engine.gO = gameObjects;
-
-
-			var camPos: Point3d = new Point3d(0, 0, 0);
-			var camRot: Quaternion = new Quaternion(0, 0, 0, 1);
-			//var camPos: Point3d = new Point3d(-3205.284990943313, -3536.4845982178817, -4027.9614941237405);
-			//var camRot: Quaternion = new Quaternion(-0.16317591100567008, 0.3368240884762062, 0.059391174481627555, 0.9254165785652491);
-
-			camera = new Camera(stage, camPos, camRot);
-			activeCamera = camera;
+			initGameObjects();
+			initCamera();
 
 			stage.addEventListener(Event.ENTER_FRAME, update);
 
 
 
+		}
+
+		protected function initGameObjects():void
+		{
+
+		}
+
+		protected function initCamera():void
+		{
+			var camPos: Point3d = new Point3d(0, 0, 0);
+				var camRot: Quaternion = new Quaternion(0, 0, 0, 1);
+				//var camPos: Point3d = new Point3d(-3205.284990943313, -3536.4845982178817, -4027.9614941237405);
+				//var camRot: Quaternion = new Quaternion(-0.16317591100567008, 0.3368240884762062, 0.059391174481627555, 0.9254165785652491);
+
+				camera = new Camera(stage, camPos, camRot);
+				activeCamera = camera;
 		}
 
 		function update(e: Event): void {

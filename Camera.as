@@ -248,7 +248,7 @@
 			
 			
 
-			/**/
+			
 			prevTime = currTime;
 			prevEpoch = epoch;
 			
@@ -259,9 +259,8 @@
 			var mouseSensitivity:Number = .2;
 
 
-			
-			//cameraLookAt(
-			//stage.removeEventListener(Event.ENTER_FRAME, update);
+			/*
+		
 			var mousePosX:Number = theStage.mouseX - (theStage.stageWidth/2);
 			var mousePosY:Number = theStage.mouseY - (theStage.stageHeight/2); 
 
@@ -284,25 +283,13 @@
 
 			lastMouseX = mousePosX;
 			lastMouseY = mousePosY;
+			*/
 
 			transformMatrix.createFromTransform(position, rotation, scale);
 
-            /*
-				shaker::Quaternion rotation = transformManager->rotation(inst);
-                shaker::Quaternion quat1;
-                
-                bx::EulerToQuat(quat1.val, 0, MATH_DEG_TO_RAD(g_mouseOffset.x * angleStep * mouseSensitivity), 0);
-                bx::quatMul(&rotation.x, &rotation.x, &quat1.x);
-                
-                bx::EulerToQuat(quat1.val, MATH_DEG_TO_RAD(g_mouseOffset.y * angleStep * mouseSensitivity),0 , 0);
-                bx::quatMul(&rotation.x, &rotation.x, &quat1.x);
-                
-                transformManager->setRotation(inst, rotation);
-
-
-            */
-
 		}
+
+		
 
 		private function myKeyDown(e: KeyboardEvent): void {
 
