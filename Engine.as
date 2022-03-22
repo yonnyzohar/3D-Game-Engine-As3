@@ -3,7 +3,7 @@
 	import flash.events.*;
 	import flash.display.*;
 	import flash.geom.Rectangle;
-
+	import flash.utils.getTimer;
 	/*
 	take note:
 	z is left (columns)
@@ -23,7 +23,8 @@
 		public static var rotateSpeed: Number = .1;
 
 		protected var gameObjects: Array = [];
-
+		private var currTime: Number;
+		private var prevTime: Number;
 		
 
 		private var bmp: Bitmap;
@@ -41,6 +42,9 @@
 			//stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
 			resolutionX = stage.stageWidth;
 			resolutionY = stage.stageHeight;
+
+			currTime = getTimer();
+			prevTime = getTimer();
 
 
 			bd = new BitmapData(resolutionX, resolutionY, false);
@@ -61,6 +65,13 @@
 
 		}
 
+		public static function removeEntity(entity:GameObject):void
+		{
+			var index:int = Engine.gO.indexOf(entity);
+			Engine.gO.splice(index,1);
+		}
+
+
 		protected function initGameObjects():void
 		{
 
@@ -74,7 +85,18 @@
 			//activeCamera = camera;
 		}
 
-		function update(e: Event): void {
+		private function update(e: Event): void {
+
+			currTime = getTimer();
+			
+			var elapsedTime: Number = currTime - prevTime;
+
+			if(elapsedTime < .1)
+			{
+				elapsedTime = .1;
+			}
+
+
 			Engine.bd.lock();
 			var i: int = 0;
 			for (i = 0; i < resolutionX * resolutionY; i++) {
@@ -86,13 +108,14 @@
 			
 
 			Engine.bd.fillRect(new Rectangle(0, 0, resolutionX, resolutionY), 0x000000);
+			activeCamera.update(elapsedTime);
 
 			var totalPolygonsPreClip: Array = [];
 			for (i = 0; i < gameObjects.length; i++) {
 				var go: GameObject = gameObjects[i];
 				//this is for updating position, rotation and scale
-				go.update();
-				activeCamera.update();
+				go.update(elapsedTime);
+				
 
 				//now we need to get all polygons from all game objects and sort them by average z
 				var polygons: Array = go.polygons;
@@ -136,17 +159,12 @@
 					}
 
 				}
-				else
-				{
-					
-				}
-				
-
 			}
 
 			lateUpdate();
 
 			Engine.bd.unlock();
+			prevTime = currTime;
 			//stage.removeEventListener(Event.ENTER_FRAME, update);
 
 		}

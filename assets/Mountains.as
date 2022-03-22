@@ -31,14 +31,7 @@ package assets
 			super();
 		}
 
-		override public function update(): void {
-			
-	
-			super.update()
-
-
-		}
-
+		
 
 
 

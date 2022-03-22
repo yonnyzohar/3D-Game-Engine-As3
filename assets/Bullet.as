@@ -2,15 +2,16 @@
 {
 	import flash.display.BitmapData;
 
-	public class Cube extends GameObject {
+	public class Bullet extends GameObject {
 
-		var n:int = 0;
+		var dist:int = 0;
 
-		public function Cube(_positon: Point3d, _rotation: Quaternion, _scale: Point3d, _bd: BitmapData) {
+		public function Bullet(_positon: Point3d, _rotation: Quaternion, _scale: Point3d, _bd: BitmapData) {
 			// constructor code
 			position = _positon; //
 			rotation = _rotation; //;
 			scale = _scale;
+			scale.x = scale.y = scale.z = 0.05;
 			bd = _bd;
 			/*
 			polygons = [
@@ -53,28 +54,36 @@
 
 		override public function update(elapsedTime:Number): void {
 			
+
 			var ms:Number = Engine.moveSpeed * elapsedTime;
 			var rs:Number = Engine.rotateSpeed * elapsedTime;
 			
-			var destPosition: Vector3 = Engine.activeCamera.getPosition();
-			var disToCamera:Number = Math.abs(EngineMath.getDistance(destPosition, position));
-			if (disToCamera < 5000 && disToCamera > (Engine.activeCamera.zNear/2))
+			dist++;
+			if(dist < 400)
 			{
-				lookAtCameraGradual();
-				moveForward(ms/4);
-			}
+				moveForward(ms * 50);
 
+				for(var i:int = 0; i < Engine.gO.length; i++)
+				{
+					var go:GameObject = Engine.gO[i];
+					if(go is Cube)
+					{
+						var hit:Boolean = go.checkColission(position);
+						if(hit)
+						{
+							Engine.removeEntity(this);
+							Engine.removeEntity(go);
+						}
+					}
+				}
+			}
+			else
+			{
+				Engine.removeEntity(this);
+			}
 			
-	
 			super.update(elapsedTime)
 
-
 		}
-
-
-
-
-
 	}
-
 }

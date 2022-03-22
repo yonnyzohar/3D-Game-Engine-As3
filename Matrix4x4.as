@@ -64,6 +64,133 @@
 			return res;
 		}
 
+		public function getTranslation():Vector3
+	    {
+	    	var res:Vector3 = new Vector3(d1, d2,d3);
+	       	return res;
+	    }
+	    
+	    public function getRightVector():Vector3
+	    {
+	        var res:Vector3 = new Vector3(a1, a2,a3);
+	       	return res;
+	    }
+
+	    public function getUpVector():Vector3
+	    {
+	        var res:Vector3 = new Vector3(b1, b2,b3);
+	       	return res;
+	    }
+/*
+    bool decompose(Vector3* translation, Quaternion* rotation, Vector3* scale)
+    {
+        if (translation)
+        {
+            // Extract the translation.
+            translation->x = un.val[12];
+            translation->y = un.val[13];
+            translation->z = un.val[14];
+        }
+        
+        // Nothing left to do.
+        if (scale == NULL && rotation == NULL)
+            return true;
+        
+        
+        // Extract the scale.
+        // This is simply the length of each axis (row/column) in the matrix.
+        Vector3 xaxis(un.val[0], un.val[1], un.val[2]);
+        float scaleX = sqrt(xaxis.x * xaxis.x + xaxis.y * xaxis.y + xaxis.z * xaxis.z);
+
+        Vector3 yaxis(un.val[4], un.val[5], un.val[6]);
+        float scaleY = sqrt(yaxis.x * yaxis.x + yaxis.y * yaxis.y + yaxis.z * yaxis.z);
+
+        Vector3 zaxis(un.val[8], un.val[9], un.val[10]);
+        float scaleZ = sqrt(zaxis.x * zaxis.x + zaxis.y * zaxis.y + zaxis.z * zaxis.z);
+
+        // Determine if we have a negative scale (true if determinant is less than zero).
+        // In this case, we simply negate a single axis of the scale.
+        float det = determinant();
+        if (det < 0)
+            scaleZ = -scaleZ;
+
+        if (scale)
+        {
+            scale->x = scaleX;
+            scale->y = scaleY;
+            scale->z = scaleZ;
+        }
+
+        // Nothing left to do.
+        if (rotation == NULL)
+            return true;
+
+        // Scale too close to zero, can't decompose rotation.
+        if (scaleX < MATH_TOLERANCE || scaleY < MATH_TOLERANCE || fabs(scaleZ) < MATH_TOLERANCE)
+            return false;
+
+        float rn;
+
+        // Factor the scale out of the matrix axes.
+        rn = 1.0f / scaleX;
+        xaxis.x *= rn;
+        xaxis.y *= rn;
+        xaxis.z *= rn;
+
+        rn = 1.0f / scaleY;
+        yaxis.x *= rn;
+        yaxis.y *= rn;
+        yaxis.z *= rn;
+
+        rn = 1.0f / scaleZ;
+        zaxis.x *= rn;
+        zaxis.y *= rn;
+        zaxis.z *= rn;
+
+        // Now calculate the rotation from the resulting matrix (axes).
+        float trace = xaxis.x + yaxis.y + zaxis.z + 1.0f;
+
+        if (trace > MATH_EPSILON)
+        {
+            float s = 0.5f / sqrt(trace);
+            rotation->w = 0.25f / s;
+            rotation->x = (yaxis.z - zaxis.y) * s;
+            rotation->y = (zaxis.x - xaxis.z) * s;
+            rotation->z = (xaxis.y - yaxis.x) * s;
+        }
+        else
+        {
+            // Note: since xaxis, yaxis, and zaxis are normalized,
+            // we will never divide by zero in the code below.
+            if (xaxis.x > yaxis.y && xaxis.x > zaxis.z)
+            {
+                float s = 0.5f / sqrt(1.0f + xaxis.x - yaxis.y - zaxis.z);
+                rotation->w = (yaxis.z - zaxis.y) * s;
+                rotation->x = 0.25f / s;
+                rotation->y = (yaxis.x + xaxis.y) * s;
+                rotation->z = (zaxis.x + xaxis.z) * s;
+            }
+            else if (yaxis.y > zaxis.z)
+            {
+                float s = 0.5f / sqrt(1.0f + yaxis.y - xaxis.x - zaxis.z);
+                rotation->w = (zaxis.x - xaxis.z) * s;
+                rotation->x = (yaxis.x + xaxis.y) * s;
+                rotation->y = 0.25f / s;
+                rotation->z = (zaxis.y + yaxis.z) * s;
+            }
+            else
+            {
+                float s = 0.5f / sqrt(1.0f + zaxis.z - xaxis.x - yaxis.y );
+                rotation->w = (xaxis.y - yaxis.x ) * s;
+                rotation->x = (zaxis.x + xaxis.z ) * s;
+                rotation->y = (zaxis.y + yaxis.z ) * s;
+                rotation->z = 0.25f / s;
+            }
+        }
+        return true;
+    }
+    */
+
 
 		public function createRotation(quat: Quaternion):Matrix4x4 
 		{

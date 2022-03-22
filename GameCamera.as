@@ -2,7 +2,7 @@
 	import flash.events.*;
 	import flash.ui.*;
 	import flash.display.Stage;
-	import flash.utils.getTimer;
+	
 	import flash.geom.Vector3D;
 
 	public class GameCamera {
@@ -27,8 +27,7 @@
 		public var rotation: Quaternion;
 		public var scale: Vector3;
 
-		private var currTime: Number;
-		private var prevTime: Number;
+		
 		public var transformMatrix: Matrix4x4;
 		private var theStage: Stage;
 
@@ -41,12 +40,9 @@
 		private var lastMouseX:Number = 0;
 		private var lastMouseY:Number = 0;
 		private var mouseIsDown:Boolean = false;
-		private var prevEpoch:Number;
-		var date:Date;
 
 		public function GameCamera(_theStage: Stage, _position: Point3d, _rotation: Quaternion) {
 			// constructor code
-			date = new Date();
 			theStage = _theStage;
 			position = _position;
 			rotation = _rotation;
@@ -55,8 +51,7 @@
 			_theStage.addEventListener(KeyboardEvent.KEY_UP, myKeyUp);
 			_theStage.addEventListener(MouseEvent.MOUSE_DOWN, mouseDown);
 			_theStage.addEventListener(MouseEvent.MOUSE_UP, mouseUp);
-			currTime = getTimer();
-			prevTime = getTimer();
+			
 			transformMatrix = new Matrix4x4();
 			transformMatrix.createFromTransform(position, rotation, scale);
 			zNear = (Engine.resolutionX / 2.0) / Math.tan(EngineMath.degreesToRad(fieldOfView / 2.0));
@@ -91,13 +86,9 @@
 
 
 
-		public function update(): void {
+		public function update(elapsedTime:Number): void {
 
-			currTime = getTimer();
-			var epoch:Number = date.time;
 			
-			var elapsedTime: Number = currTime - prevTime;
-			var elapsedEpoch: Number = epoch - prevEpoch;
 			
 			
 			var COS: Number;
@@ -106,18 +97,16 @@
 			var moveVector: Point3d;
 			var quat1: Quaternion;
 			
-			if(elapsedTime < .1)
-			{
-				elapsedTime = .1;
-			}
+			
 			
 			var ms:Number = Engine.moveSpeed * elapsedTime;
 			var rs:Number = Engine.rotateSpeed * elapsedTime;
+			ms /= 2;
 
 
 
 			if (Model.W) {
-				
+				/*
 				var deltaX:Number = ms * (rotation.x * rotation.z + rotation.w * rotation.y);
 				var deltaY:Number = ms * (rotation.y * rotation.z - rotation.w * rotation.x);
 				var deltaZ:Number = (ms/2) - ms * (rotation.x * rotation.x + rotation.y * rotation.y);
@@ -128,11 +117,19 @@
 				positionMinusZ.x += deltaX;
 				positionMinusZ.y += deltaY;
 				positionMinusZ.z += deltaZ;
-				
+				*/
+				var forward:Vector3 = transformMatrix.getForwardVector();
+				position.x += (forward.x *ms);
+				position.y += (forward.y *ms);
+				position.z += (forward.z *ms);
+
+				positionMinusZ.x += (forward.x *ms);
+				positionMinusZ.y += (forward.y *ms);
+				positionMinusZ.z += (forward.z *ms);
 			}
 
 			if (Model.S) {
-
+				/*
 				var deltaX:Number = ms * (rotation.x * rotation.z + rotation.w * rotation.y);
 				var deltaY:Number = ms * (rotation.y * rotation.z - rotation.w * rotation.x);
 				var deltaZ:Number = (ms/2) - ms * (rotation.x * rotation.x + rotation.y * rotation.y);
@@ -144,28 +141,20 @@
 				positionMinusZ.x -= deltaX;
 				positionMinusZ.y -= deltaY;
 				positionMinusZ.z -= deltaZ;
-				
-			}
+				*/
+				var forward:Vector3 = transformMatrix.getForwardVector();
+				position.x -= (forward.x *ms);
+				position.y -= (forward.y *ms);
+				position.z -= (forward.z *ms);
 
-			if (Model.A) {
-				//strafe left
-				//left vector
-				var deltaX:Number = (ms/2) - ms * (rotation.y * rotation.y + rotation.z * rotation.z);
-				var deltaY:Number = ms * (rotation.x * rotation.y + rotation.w * rotation.z);
-				var deltaZ:Number = ms * (rotation.x * rotation.z - rotation.w * rotation.y);
-
-				position.x -= deltaX;
-				position.y -= deltaY;
-				position.z -= deltaZ;
-
-				positionMinusZ.x -= deltaX;
-				positionMinusZ.y -= deltaY;
-				positionMinusZ.z -= deltaZ;
+				positionMinusZ.x -= (forward.x *ms);
+				positionMinusZ.y -= (forward.y *ms);
+				positionMinusZ.z -= (forward.z *ms);
 				
 			}
 
 			if (Model.D) {
-
+				/*
 				var deltaX:Number = (ms/2) - ms * (rotation.y * rotation.y + rotation.z * rotation.z);
 				var deltaY:Number = ms * (rotation.x * rotation.y + rotation.w * rotation.z);
 				var deltaZ:Number = ms * (rotation.x * rotation.z - rotation.w * rotation.y);
@@ -177,31 +166,60 @@
 				positionMinusZ.x += deltaX;
 				positionMinusZ.y += deltaY;
 				positionMinusZ.z += deltaZ;
+				*/
+				var right:Vector3 = transformMatrix.getRightVector();
+				position.x += (right.x *ms);
+				position.y += (right.y *ms);
+				position.z += (right.z *ms);
+
+				positionMinusZ.x += (right.x *ms);
+				positionMinusZ.y += (right.y *ms);
+				positionMinusZ.z += (right.z *ms);
 				
 			}
 
-			if (Model.up) {
-				//rotation.x -= Engine.rotateSpeed;
 
-				//var quat:Quaternion = Engine.eulerToQuat(rotation);
+			if (Model.A) {
+				//strafe left
+				//left vector
+				/*
+				var deltaX:Number = (ms/2) - ms * (rotation.y * rotation.y + rotation.z * rotation.z);
+				var deltaY:Number = ms * (rotation.x * rotation.y + rotation.w * rotation.z);
+				var deltaZ:Number = ms * (rotation.x * rotation.z - rotation.w * rotation.y);
+
+				position.x -= deltaX;
+				position.y -= deltaY;
+				position.z -= deltaZ;
+
+				positionMinusZ.x -= deltaX;
+				positionMinusZ.y -= deltaY;
+				positionMinusZ.z -= deltaZ;
+				*/
+				var right:Vector3 = transformMatrix.getRightVector();
+				position.x -= (right.x *ms);
+				position.y -= (right.y *ms);
+				position.z -= (right.z *ms);
+
+				positionMinusZ.x -= (right.x *ms);
+				positionMinusZ.y -= (right.y *ms);
+				positionMinusZ.z -= (right.z *ms);
+				
+			}
+
+			/*
+			if (Model.up) {
+
 				moveVector = new Point3d(-rs * MATH_DEG_TO_RAD, 0, 0);
 				quat1 = EngineMath.eulerToQuat(moveVector);
 				rotation = EngineMath.quatMul(rotation, quat1);
-				//rotation = Engine.quatToEuler(res);
-				/**/
-
 			}
 
 			if (Model.down) {
-				//rotation.x += Engine.rotateSpeed;
-
-				//var quat:Quaternion  = Engine.eulerToQuat(rotation);
 				moveVector = new Point3d(rs * MATH_DEG_TO_RAD, 0, 0);
 				quat1 = EngineMath.eulerToQuat(moveVector);
 				rotation = EngineMath.quatMul(rotation, quat1);
-				//rotation = Engine.quatToEuler(res);
-				/**/
 			}
+			*/
 
 			if (Model.right) {
 
@@ -251,12 +269,6 @@
 			
 			
 
-			
-			prevTime = currTime;
-			prevEpoch = epoch;
-			
-		
-			
 			//trace("pos: ", position.x, position.y, position.z, "rotation:", rotation.x, rotation.y, rotation.z, rotation.w);
 			var angleStep:Number = .2;
 			var mouseSensitivity:Number = .2;
@@ -282,13 +294,23 @@
 
 			}
 
-			
-
 			lastMouseX = mousePosX;
 			lastMouseY = mousePosY;
 			*/
 
 			transformMatrix.createFromTransform(position, rotation, scale);
+
+		}
+
+		public function cameraLookAt(worldPosition: Vector3): void {
+			var destPosition: Vector3 = new Vector3(worldPosition.x, worldPosition.y, worldPosition.z);
+
+			//get the forward vector by subtracting the destination from the current entity
+			var forward: Vector3 = EngineMath.vec3Sub(destPosition, position);
+
+			rotation = EngineMath.quatLookAt(forward, EngineMath.UP);
+
+
 
 		}
 
@@ -315,6 +337,10 @@
 				Model.right = true;
 				Model.left = false;
 			}
+			if(e.keyCode == Keyboard.SPACE)
+			{
+				onSpacePressed();
+			}
 
 
 			if (e.keyCode == Keyboard.W) {
@@ -339,8 +365,15 @@
 			}
 
 		}
+		protected function onSpacePressed():void
+		{
 
+		}
 
+		protected function onSpaceReleased():void
+		{
+
+		}
 
 
 		private function myKeyUp(e: KeyboardEvent): void {
@@ -359,6 +392,11 @@
 			if (e.keyCode == Keyboard.RIGHT) {
 
 				Model.right = false;
+			}
+
+			if(e.keyCode == Keyboard.SPACE)
+			{
+				onSpaceReleased();
 			}
 
 
@@ -385,17 +423,7 @@
 
 		}
 
-		public function cameraLookAt(worldPosition: Vector3): void {
-			var destPosition: Vector3 = new Vector3(worldPosition.x, worldPosition.y, worldPosition.z);
-
-			//get the forward vector by subtracting the destination from the current entity
-			var forward: Vector3 = EngineMath.vec3Sub(destPosition, position);
-
-			rotation = EngineMath.quatLookAt(forward, EngineMath.UP);
-
-
-
-		}
+		
 
 	}
 

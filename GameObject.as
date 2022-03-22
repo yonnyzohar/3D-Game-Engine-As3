@@ -8,17 +8,91 @@
 		public var scale:Point3d;
 		public var bd:BitmapData;
 		public var transformMatrix:Matrix4x4;
+		private var boundingBox:Object;
 		
 		public function GameObject() {
 			// constructor code
+
+			getBoundingBox(polygons);
+
 			transformMatrix = new Matrix4x4();
 			transformMatrix.createFromTransform(position, rotation, scale);
 		}
 
-		
+		function getBoundingBox(_polygons:Array):void
+		{
+			var minX:Number = Number.MAX_VALUE;
+			var maxX:Number = Number.MIN_VALUE;;
+			var minY:Number = Number.MAX_VALUE;
+			var maxY:Number = Number.MIN_VALUE;
+			var minZ:Number = Number.MAX_VALUE;
+			var maxZ:Number = Number.MIN_VALUE;
+
+			for(var i:int = 0; i < _polygons.length; i++)
+			{
+				var polygon:Polygon = _polygons[i];
+				for(var j:int = 0; j < 3; j++)
+				{
+					var p:Point3d = polygon.localPositions[j];
+					if(p.x < minX)
+					{
+						minX = p.x;
+					}
+					if(p.x > maxX)
+					{
+						maxX = p.x;
+					}
+
+					if(p.y < minY)
+					{
+						minY = p.y;
+					}
+					if(p.y > maxY)
+					{
+						maxY = p.y;
+					}
+
+					if(p.z < minZ)
+					{
+						minZ = p.z;
+					}
+					if(p.z > maxZ)
+					{
+						maxZ = p.z;
+					}
+				}
+				
+			}
+
+			boundingBox = {"minX" : minX , "maxX":maxX, "minY":minY, "maxY":maxY, "minZ":minZ, "maxZ":maxZ};
+		}
+
+		public function checkColission(targetPos:Point3d):Boolean
+		{
+			var minX:Number = position.x + boundingBox.minX;
+			var maxX:Number = position.x + boundingBox.maxX;
+			var minY:Number = position.y + boundingBox.minY;
+			var maxY:Number = position.y + boundingBox.maxY;
+			var minZ:Number = position.z + boundingBox.minZ;
+			var maxZ:Number = position.z + boundingBox.maxZ;
+
+			if( targetPos.x > minX && 
+				targetPos.x < maxX &&
+				targetPos.y > minY &&
+				targetPos.y < maxY &&
+				targetPos.z > minZ &&
+				targetPos.z < maxZ
+
+				)
+			{
+				return true;
+			}
+			return false;
+
+		}
 
 		
-		public function update(): void {
+		public function update(elapsedTime:Number): void {
 
 			transformMatrix.createFromTransform(position, rotation, scale);
 
@@ -44,7 +118,7 @@
 
 		}
 
-		public function moveForward(speed:Number = 1):void
+		public function moveForward(speed:Number):void
 		{
 			//move forwards - some bug here with object shrinking
 			

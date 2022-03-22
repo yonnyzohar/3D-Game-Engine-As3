@@ -30,17 +30,6 @@
 			super();
 		}
 
-		override public function update(): void {
-			var p: Point3d = new Point3d(Engine.activeCamera.position.x, Engine.activeCamera.position.y, Engine.activeCamera.position.z);
-			position = p;
-
-
-			//camera.cameraLookAt(cube.position);
-			super.update()
-
-
-		}
-
 
 
 

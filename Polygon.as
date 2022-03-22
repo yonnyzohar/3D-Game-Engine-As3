@@ -4,7 +4,7 @@
 	public class Polygon {
 
 
-		private var localPositions: Array; //model - > the poins in local space according to 0,0
+		public var localPositions: Array; //model - > the poins in local space according to 0,0
 		private var worldPositions: Array; //world - > the points in the world space according to world 0,0
 		private var cameraPositions: Array; //view -> the points in relation to the camera position
 		private var screenPositions: Array; //projection - > the 3d points projected to a 2d x,y screen

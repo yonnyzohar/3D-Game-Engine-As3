@@ -33,13 +33,6 @@
 			super();
 		}
 
-		override public function update(): void {
-			//rotation.y += 0.01;
-			//rotation.x += 0.01;
-			super.update();
-		}
-
-		
 
 
 
