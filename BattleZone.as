@@ -11,8 +11,8 @@
 		protected var player: Player;
 		private var tileSize:Number = 200;
 		private var map:Array = [
-			[0,0,0,0,0,0,0,0,0,0,1],
-			[0,0,0,1,0,0,0,0,0,0,0],
+			[0,0,0,0,0,0,0,0,0,0,0],
+			[0,0,0,0,0,0,0,0,0,0,0],
 			[0,0,0,0,0,0,0,0,0,0,0],
 			[0,0,0,0,0,0,0,0,0,0,0],
 			[0,0,0,0,0,2,0,0,0,0,0],
@@ -20,7 +20,7 @@
 			[0,0,0,0,0,0,0,0,0,0,0],
 			[0,0,0,0,0,0,0,0,0,0,0],
 			[0,0,0,0,0,0,0,0,0,0,0],
-			[0,0,1,0,0,0,0,0,0,0,1]
+			[0,0,0,0,0,0,0,0,0,0,1]
 		];
 
 		private var initialCamPosX:Number;
@@ -63,10 +63,32 @@
 			activeCamera = player as GameCamera;
 		}
 
+		private function drawLine(start:Vector3, end:Vector3):void
+		{
+			var distanceH: Number = EngineMath.getDistance(start, end);
+			var distanceX: Number = end.x - start.x;
+			var distanceY: Number = end.y - start.y;
+
+			var cos: Number = distanceX / distanceH;
+			var sin: Number = distanceY / distanceH;
+
+			var startX: Number = start.x;
+			var startY: Number = start.y;
+
+			for (var i: int = 0; i < distanceH; i++) {
+				Engine.bd.setPixel(startX, startY, 0xffffff);
+				startX += cos;
+				startY += sin;
+			}
+		}
+
+
 		override public function lateUpdate():void
 		{
-			var camPosX:int = int(activeCamera.getPosition().z/10);
-			var camPosY:int = int(activeCamera.getPosition().x/10);
+			var shrinkScale:Number = 0.05;
+
+			var camPosX:int = int(activeCamera.getPosition().z*shrinkScale);
+			var camPosY:int = int(activeCamera.getPosition().x*shrinkScale);
 
 			
 
@@ -83,20 +105,33 @@
 
 			for(var i:int = 0; i < gameObjects.length; i++)
 			{
-				for(var x:int = -2; x <= 2; x++)
-				{
-					for(var y:int = -2; y <= 2; y++)
-					{
-						var xPos:int = int(gameObjects[i].position.z/10);
-						var yPos:int = int(gameObjects[i].position.x/10);
+				var boundingBox:Object = gameObjects[i].boundingBox;
+				var position:Point3d = gameObjects[i].position;
 
 
-						Engine.bd.setPixel(xPos + x, yPos + y, 0x00ff00);
-					}
-				}
+				var minZ:Number = (position.z + boundingBox.frontBtmLeft.z)*shrinkScale;
+				var maxZ:Number = (position.z + boundingBox.backBtmLeft.z)*shrinkScale;
+
+				var minX:Number = (position.x + boundingBox.frontBtmLeft.x)*shrinkScale;
+				var maxX:Number = (position.x + boundingBox.backBtmRight.x)*shrinkScale;
 				
-				
+
+				drawLine( new Vector3(minZ,minX,0), new Vector3(maxZ,minX,0));
+				drawLine( new Vector3(maxZ,minX,0), new Vector3(maxZ,maxX,0));
+				drawLine( new Vector3(maxZ,maxX,0), new Vector3(minZ,maxX,0));
+				drawLine( new Vector3(minZ,maxX,0), new Vector3(minZ,minX,0));
+
 			}
+
+			drawLine( new Vector3(map.length * tileSize * shrinkScale,0,0), new Vector3(map.length * tileSize * shrinkScale,map.length * tileSize * shrinkScale,0));
+
+
+			//draw floor line
+			for(var i:int = 0; i < Engine.bd.width; i++)
+			{
+				Engine.bd.setPixel(i, Engine.bd.height/2, 0x00ff00);
+			}
+
 		}
 	}
 }

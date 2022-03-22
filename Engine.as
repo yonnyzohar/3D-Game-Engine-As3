@@ -161,6 +161,8 @@
 				}
 			}
 
+			
+
 			lateUpdate();
 
 			Engine.bd.unlock();
@@ -237,12 +239,7 @@
 		}
 		/*
 		
-		inline float getDepthFromDistance(float distFromCamera, float zNear, float zFar)
-    {
-        float depth = (distFromCamera - zNear)/(zFar - zNear);
-        return depth;
-    }
-		
+
 		
 		//old euler based rotation
 		public static function rotate(original: Point3d, rotation: Point3d): Point3d {
@@ -270,6 +267,7 @@
 		public static function applyPerspective(orig: Point3d): Point3d {
 			var zNear: Number = Engine.activeCamera.zNear;
 			var scale:Number = (zNear / (zNear + orig.z));
+
 			var returnX: Number = orig.x * scale;
 			var returnY: Number = orig.y * scale;
 			var returnZ: Number = orig.z;

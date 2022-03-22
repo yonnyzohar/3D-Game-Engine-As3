@@ -245,6 +245,7 @@
 				/**/
 			}
 
+			/*
 			if (Model.Q) {
 				//rotation.y -= Engine.rotateSpeed * elapsedTime;
 
@@ -253,7 +254,6 @@
 				quat1 = EngineMath.eulerToQuat(moveVector);
 				rotation = EngineMath.quatMul(rotation, quat1);
 				//rotation = Engine.quatToEuler(res);
-				/**/
 			}
 
 			if (Model.E) {
@@ -264,10 +264,9 @@
 				quat1 = EngineMath.eulerToQuat(moveVector);
 				rotation = EngineMath.quatMul(rotation, quat1);
 				//rotation = Engine.quatToEuler(res);
-				/**/
 			}
 			
-			
+			*/
 
 			//trace("pos: ", position.x, position.y, position.z, "rotation:", rotation.x, rotation.y, rotation.z, rotation.w);
 			var angleStep:Number = .2;

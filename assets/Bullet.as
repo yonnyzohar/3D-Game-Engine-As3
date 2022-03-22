@@ -66,7 +66,7 @@
 				for(var i:int = 0; i < Engine.gO.length; i++)
 				{
 					var go:GameObject = Engine.gO[i];
-					if(go is Cube)
+					if(go != this)
 					{
 						var hit:Boolean = go.checkColission(position);
 						if(hit)

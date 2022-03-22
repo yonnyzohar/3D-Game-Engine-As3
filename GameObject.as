@@ -8,7 +8,7 @@
 		public var scale:Point3d;
 		public var bd:BitmapData;
 		public var transformMatrix:Matrix4x4;
-		private var boundingBox:Object;
+		public var boundingBox:Object;
 		
 		public function GameObject() {
 			// constructor code
@@ -64,24 +64,38 @@
 				
 			}
 
-			boundingBox = {"minX" : minX , "maxX":maxX, "minY":minY, "maxY":maxY, "minZ":minZ, "maxZ":maxZ};
+			boundingBox = {
+				"frontBtmLeft"  : new Point3d(minX, minY, minZ),
+				"frontTopLeft"  : new Point3d(minX, maxY, minZ),
+				"backBtmLeft"   : new Point3d(minX, minY, maxZ),
+				"backTopLeft"   : new Point3d(minX, maxY, maxZ),
+
+				"frontBtmRight" : new Point3d(maxX, minY, minZ),
+				"frontTopRight" : new Point3d(maxX, maxY, minZ),
+				"backTopRight"  : new Point3d(maxX, maxY, maxZ),
+				"backBtmRight"  : new Point3d(maxX, minY, maxZ)
+			};
 		}
 
 		public function checkColission(targetPos:Point3d):Boolean
 		{
-			var minX:Number = position.x + boundingBox.minX;
-			var maxX:Number = position.x + boundingBox.maxX;
-			var minY:Number = position.y + boundingBox.minY;
-			var maxY:Number = position.y + boundingBox.maxY;
-			var minZ:Number = position.z + boundingBox.minZ;
-			var maxZ:Number = position.z + boundingBox.maxZ;
+			var bb = boundingBox;
+			var frontBtmLeft  :Point3d = new Point3d(position.x + bb.frontBtmLeft.x,  position.y + bb.frontBtmLeft.y,   position.z + bb.frontBtmLeft.z);
+			var frontTopLeft  :Point3d = new Point3d(position.x + bb.frontTopLeft.x,  position.y + bb.frontTopLeft.y,   position.z + bb.frontTopLeft.z);
+			var backBtmLeft   :Point3d = new Point3d(position.x + bb.backBtmLeft.x,   position.y  + bb.backBtmLeft.y,   position.z  + bb.backBtmLeft.z);
+			var backTopLeft   :Point3d = new Point3d(position.x + bb.backTopLeft.x,   position.y  + bb.backTopLeft.y,   position.z  + bb.backTopLeft.z);
+			var frontBtmRight :Point3d = new Point3d(position.x + bb.frontBtmRight.x, position.y  + bb.frontBtmRight.y, position.z  + bb.frontBtmRight.z);
+			var frontTopRight :Point3d = new Point3d(position.x + bb.frontTopRight.x, position.y  + bb.frontTopRight.y, position.z  + bb.frontTopRight.z);
+			var backTopRight :Point3d = new Point3d(position.x + bb.backTopRight.x, position.y  + bb.backTopRight.y, position.z  + bb.backTopRight.z);
+			var backBtmRight :Point3d = new Point3d(position.x + bb.backBtmRight.x, position.y  + bb.backBtmRight.y, position.z  + bb.backBtmRight.z);
 
-			if( targetPos.x > minX && 
-				targetPos.x < maxX &&
-				targetPos.y > minY &&
-				targetPos.y < maxY &&
-				targetPos.z > minZ &&
-				targetPos.z < maxZ
+
+			if( targetPos.x >= frontBtmLeft.x && 
+				targetPos.x <= backTopRight.x &&
+				targetPos.y >= frontBtmLeft.y &&
+				targetPos.y <= frontTopLeft.y &&
+				targetPos.z >= frontBtmRight.z &&
+				targetPos.z <= backBtmLeft.z
 
 				)
 			{
@@ -108,14 +122,21 @@
 			//get the forward vector by subtracting the destination from the current entity
 
 			var currentRotation:Quaternion = new Quaternion(rotation.x, rotation.y, rotation.z, rotation.w);
-
 			var forward: Vector3 = EngineMath.vec3Sub(destPosition, position);
-
 			rotation = EngineMath.quatLookAt(forward, EngineMath.UP);
-			//for some reason we need o reverse y rotation...
-			//rotation.y *= -1;
-			//rotation.z *= -1;
+			
 
+		}
+
+		public function getNextForwardMove(speed:Number):Point3d
+		{
+			var p:Point3d = new Point3d(position.x, position.y, position.z);
+			var forward:Vector3 = transformMatrix.getForwardVector();
+			p.x += (forward.x *speed);
+			p.y += (forward.y *speed);
+			p.z += (forward.z *speed);
+			
+			return p;
 		}
 
 		public function moveForward(speed:Number):void
@@ -123,11 +144,11 @@
 			//move forwards - some bug here with object shrinking
 			
 			var forward:Vector3 = transformMatrix.getForwardVector();
-			position.x += (forward.x *speed);
-			position.y += (forward.y *speed);
-			position.z += (forward.z *speed);
+			position.x += (forward.x * speed);
+			position.y += (forward.y * speed);
+			position.z += (forward.z * speed);
 
-			/**/
+			
 		}
 
 		public function lookAtCameraGradual(rotationSpeed:Number = 0.01):void
