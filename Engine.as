@@ -103,10 +103,6 @@
 				zBuffer[i] = 0;
 			}
 			
-			//trace(stage.mouseX,  stage.mouseY, pos.x, pos.y, pos.z);
-			
-			
-
 			Engine.bd.fillRect(new Rectangle(0, 0, resolutionX, resolutionY), 0x000000);
 			activeCamera.update(elapsedTime);
 

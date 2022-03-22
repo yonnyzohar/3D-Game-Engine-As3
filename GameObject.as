@@ -113,20 +113,7 @@
 
 		}
 
-		public function lookAtCamera():void
-		{
-			//look at
-
-			var destPosition: Vector3 = Engine.activeCamera.getPosition();
-
-			//get the forward vector by subtracting the destination from the current entity
-
-			var currentRotation:Quaternion = new Quaternion(rotation.x, rotation.y, rotation.z, rotation.w);
-			var forward: Vector3 = EngineMath.vec3Sub(destPosition, position);
-			rotation = EngineMath.quatLookAt(forward, EngineMath.UP);
-			
-
-		}
+		
 
 		public function getNextForwardMove(speed:Number):Point3d
 		{
@@ -151,6 +138,21 @@
 			
 		}
 
+		public function lookAtCamera():void
+		{
+			//look at
+
+			var destPosition: Vector3 = Engine.activeCamera.getPosition();
+
+			//get the forward vector by subtracting the destination from the current entity
+
+			var currentRotation:Quaternion = new Quaternion(rotation.x, rotation.y, rotation.z, rotation.w);
+			var forward: Vector3 = EngineMath.vec3Sub(destPosition, position);
+			rotation = EngineMath.quatLookAt(forward, EngineMath.UP);
+			
+
+		}
+
 		public function lookAtCameraGradual(rotationSpeed:Number = 0.01):void
 		{
 			//gradually movr towards camera
@@ -161,6 +163,12 @@
 			var rotTowardsCam:Quaternion = EngineMath.quatLookAt(forward, EngineMath.UP);
 			//for some reason we need o reverse y rotation...
 
+
+
+			rotation = Quaternion.RotateTowards(currentRotation,rotTowardsCam, 1 );
+
+
+			/*
 			var diff:Quaternion = new Quaternion(
 					(rotTowardsCam.x - currentRotation.x) , 
 					(rotTowardsCam.y - currentRotation.y),  
@@ -174,7 +182,11 @@
 				rotation.y += (diff.y * rotationSpeed);
 				rotation.z += (diff.z * rotationSpeed);
 				rotation.w += (diff.w * rotationSpeed);
+
+			
+				trace(rotation.x, rotation.y, rotation.z, rotation.w);
 			}
+			*/
 			
 		}
 
