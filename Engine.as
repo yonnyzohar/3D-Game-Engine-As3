@@ -4,6 +4,13 @@
 	import flash.display.*;
 	import flash.geom.Rectangle;
 
+	/*
+	take note:
+	z is left (columns)
+	x is forwards (rows)
+
+	*/
+
 
 	public class Engine extends MovieClip {
 
@@ -17,7 +24,7 @@
 
 		protected var gameObjects: Array = [];
 
-		protected var camera: Camera;
+		
 
 		private var bmp: Bitmap;
 		public static var bd: BitmapData;
@@ -25,7 +32,8 @@
 		
 		public static var gO:Array ;
 
-		public static var activeCamera:Camera;
+		public static var activeCamera:GameCamera;
+		
 
 
 		public function Engine() {
@@ -61,12 +69,9 @@
 		protected function initCamera():void
 		{
 			var camPos: Point3d = new Point3d(0, 0, 0);
-				var camRot: Quaternion = new Quaternion(0, 0, 0, 1);
-				//var camPos: Point3d = new Point3d(-3205.284990943313, -3536.4845982178817, -4027.9614941237405);
-				//var camRot: Quaternion = new Quaternion(-0.16317591100567008, 0.3368240884762062, 0.059391174481627555, 0.9254165785652491);
-
-				camera = new Camera(stage, camPos, camRot);
-				activeCamera = camera;
+			var camRot: Quaternion = new Quaternion(0, 0, 0, 1);
+			//camera = new GameCamera(stage, camPos, camRot);
+			//activeCamera = camera;
 		}
 
 		function update(e: Event): void {
@@ -87,13 +92,13 @@
 				var go: GameObject = gameObjects[i];
 				//this is for updating position, rotation and scale
 				go.update();
-				camera.update();
+				activeCamera.update();
 
 				//now we need to get all polygons from all game objects and sort them by average z
 				var polygons: Array = go.polygons;
 				for (var j: int = 0; j < polygons.length; j++) {
 					polygons[j].calculateWorldPos(go.rotation, go.position);
-					polygons[j].calculateCameraView(camera);
+					polygons[j].calculateCameraView(activeCamera);
 					totalPolygonsPreClip.push(polygons[j]);
 
 				}
@@ -138,11 +143,18 @@
 				
 
 			}
+
+			lateUpdate();
+
 			Engine.bd.unlock();
 			//stage.removeEventListener(Event.ENTER_FRAME, update);
 
 		}
 
+		public function lateUpdate():void
+		{
+			
+		}
 
 		public static function translate(orig: Point3d, translation: Point3d): Point3d {
 			var newPoint: Point3d = new Point3d(orig.x + translation.x, orig.y + translation.y, orig.z + translation.z, orig.u, orig.v);
@@ -159,7 +171,7 @@
 		}
 
 		//take screen coords and translate them to a 3d point in the world
-		public static function unprojectCoordinate(_camera: Camera, _x: Number, _y: Number, depth: Number): Vector3 {
+		public static function unprojectCoordinate(_camera: GameCamera, _x: Number, _y: Number, depth: Number): Vector3 {
 			// Get the number of parameters.
 
 
@@ -167,7 +179,7 @@
 			var view: Matrix4x4 = EngineMath.mtxInverse(cameraMatrix);
 
 
-			var proj: Matrix4x4 = EngineMath.mtxProjLh(_camera.fovY, _camera.aspectRatio, Camera.zNear, Camera.zFar);
+			var proj: Matrix4x4 = EngineMath.mtxProjLh(_camera.fovY, _camera.aspectRatio, Engine.activeCamera.zNear, Engine.activeCamera.zFar);
 
 			var viewPort: Rectangle = new Rectangle(0, 0, resolutionX, resolutionY);
 
@@ -238,7 +250,7 @@
 		////////////////////////////////////////////////
 
 		public static function applyPerspective(orig: Point3d): Point3d {
-			var zNear: Number = Camera.zNear;
+			var zNear: Number = Engine.activeCamera.zNear;
 			var scale:Number = (zNear / (zNear + orig.z));
 			var returnX: Number = orig.x * scale;
 			var returnY: Number = orig.y * scale;

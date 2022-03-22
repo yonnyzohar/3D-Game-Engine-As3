@@ -52,7 +52,7 @@
 
 		}
 
-		public function calculateCameraView(camera: Camera) {
+		public function calculateCameraView(camera: GameCamera) {
 
 			var i: int = 0;
 
@@ -705,7 +705,7 @@
 
 				var pointsAreOutside: Array = [];
 				for (var j: int = 0; j < 3; j++) {
-					pointsAreOutside[j] = currentTriangle.getCameraPositions()[j].z < 0;//0(-Camera.zNear * 0.1)
+					pointsAreOutside[j] = currentTriangle.getCameraPositions()[j].z < 0;//0(-Engine.activeCamera.zNear * 0.1)
 					if (pointsAreOutside[j]) {
 
 						outsidePoints.push(currentTriangle.getCameraPositions()[j]);

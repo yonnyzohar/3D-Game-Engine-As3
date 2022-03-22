@@ -58,6 +58,13 @@
 			d4 = (1.0);
 		}
 
+		public function getForwardVector():Vector3
+		{
+			var res:Vector3 = new Vector3(c1, c2,c3);
+			return res;
+		}
+
+
 		public function createRotation(quat: Quaternion):Matrix4x4 
 		{
 			var m:Matrix4x4 = new Matrix4x4();
