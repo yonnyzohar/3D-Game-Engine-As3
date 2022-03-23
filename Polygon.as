@@ -15,8 +15,10 @@
 		private var bd: BitmapData;
 		public var averageZ: Number;
 		public var normalZ: Number;
+		private var wireFrameColor:uint;
 
-		public function Polygon(_p1: Point3d, _p2: Point3d, _p3: Point3d, _bd: BitmapData) {
+		public function Polygon(_p1: Point3d, _p2: Point3d, _p3: Point3d, _bd: BitmapData, _wireFrameColor:uint = 0xffffff) 
+		{
 			p1 = _p1;
 			p2 = _p2;
 			p3 = _p3;
@@ -25,6 +27,12 @@
 			screenPositions = [p1, p2, p3];
 			cameraPositions = [p1, p2, p3];
 			bd = _bd;
+			wireFrameColor = _wireFrameColor;
+		}
+
+		public function setFrameColor(color:uint):void
+		{
+			wireFrameColor = color;
 		}
 
 		public function getLocalPositions(): Array {
@@ -153,7 +161,7 @@
 				var startY: Number = p.y;
 
 				for (var i: int = 0; i < distanceH; i++) {
-					Engine.bd.setPixel(startX, startY, 0xffffff);
+					Engine.bd.setPixel(startX, startY, wireFrameColor);
 					startX += cos;
 					startY += sin;
 				}
@@ -398,7 +406,7 @@
 		//a seperate function will handle polygons that are "behind us"
 		public function getClippedTriangles(): Array {
 			var toReturn: Array = [];
-			toReturn.push(new Polygon(screenPositions[0], screenPositions[1], screenPositions[2], bd));
+			toReturn.push(new Polygon(screenPositions[0], screenPositions[1], screenPositions[2], bd, wireFrameColor));
 
 			var noTriangles: int;
 			var insidePoints: Array = []; // array of points3d
@@ -422,7 +430,7 @@
 				//if there are no points outside the screen, return the original triangle bank in
 				if (outsidePoints.length == 0) {
 					
-					toReturn.push(new Polygon(screenPositions[0], screenPositions[1], screenPositions[2], bd));
+					toReturn.push(new Polygon(screenPositions[0], screenPositions[1], screenPositions[2], bd, wireFrameColor));
 
 				} //if one point is outside the screen, make up 2 new triangles from the remaining area - > study this code!
 				//what this code does it get the point that is to the left of the screen and sets it x as 0.
@@ -452,9 +460,9 @@
 					extraPoint2.v = outsidePoints[0].v + (0 - outsidePoints[0].x) * (insidePoints[1].v - outsidePoints[0].v) / (insidePoints[1].x - outsidePoints[0].x);
 					extraPoint2.w = outsidePoints[0].w + (0 - outsidePoints[0].x) * (insidePoints[1].w - outsidePoints[0].w) / (insidePoints[1].x - outsidePoints[0].x);
 
-					toReturn.push(new Polygon(extraPoint1, insidePoints[0], insidePoints[1], bd));
+					toReturn.push(new Polygon(extraPoint1, insidePoints[0], insidePoints[1], bd,wireFrameColor));
 
-					toReturn.push(new Polygon(extraPoint2, extraPoint1, insidePoints[1], bd));
+					toReturn.push(new Polygon(extraPoint2, extraPoint1, insidePoints[1], bd,wireFrameColor));
 
 				} //if there are 2 points outside the screen, make up 2 new triangles from the remaining area - > study this code!
 				else if (outsidePoints.length == 2) {
@@ -479,7 +487,7 @@
 					extraPoint2.v = outsidePoints[1].v + (0 - outsidePoints[1].x) * (insidePoints[0].v - outsidePoints[1].v) / (insidePoints[0].x - outsidePoints[1].x);
 					extraPoint2.w = outsidePoints[1].w + (0 - outsidePoints[1].x) * (insidePoints[0].w - outsidePoints[1].w) / (insidePoints[0].x - outsidePoints[1].x);
 
-					toReturn.push(new Polygon(extraPoint1, extraPoint2, insidePoints[0], bd));
+					toReturn.push(new Polygon(extraPoint1, extraPoint2, insidePoints[0], bd,wireFrameColor));
 				}
 			}
 
@@ -501,7 +509,7 @@
 					}
 				}
 				if (outsidePoints.length == 0) {
-					toReturn.push(new Polygon(insidePoints[0], insidePoints[1], insidePoints[2], bd));
+					toReturn.push(new Polygon(insidePoints[0], insidePoints[1], insidePoints[2], bd,wireFrameColor));
 				} else if (outsidePoints.length == 1) {
 					var extraPoint1: Point3d = new Point3d(0, 0, 0, 0, 0);
 					extraPoint1.x = Engine.resolutionX - 1;
@@ -521,9 +529,9 @@
 					extraPoint2.v = outsidePoints[0].v + (Engine.resolutionX - 1 - outsidePoints[0].x) * (insidePoints[1].v - outsidePoints[0].v) / (insidePoints[1].x - outsidePoints[0].x);
 					extraPoint2.w = outsidePoints[0].w + (Engine.resolutionX - 1 - outsidePoints[0].x) * (insidePoints[1].w - outsidePoints[0].w) / (insidePoints[1].x - outsidePoints[0].x);
 
-					toReturn.push(new Polygon(extraPoint1, insidePoints[0], insidePoints[1], bd));
+					toReturn.push(new Polygon(extraPoint1, insidePoints[0], insidePoints[1], bd,wireFrameColor));
 
-					toReturn.push(new Polygon(extraPoint2, extraPoint1, insidePoints[1], bd));
+					toReturn.push(new Polygon(extraPoint2, extraPoint1, insidePoints[1], bd,wireFrameColor));
 
 				} else if (outsidePoints.length == 2) {
 					var extraPoint1: Point3d = new Point3d(0, 0, 0, 0, 0);
@@ -544,7 +552,7 @@
 					extraPoint2.v = outsidePoints[1].v + (Engine.resolutionX - 1 - outsidePoints[1].x) * (insidePoints[0].v - outsidePoints[1].v) / (insidePoints[0].x - outsidePoints[1].x);
 					extraPoint2.w = outsidePoints[1].w + (Engine.resolutionX - 1 - outsidePoints[1].x) * (insidePoints[0].w - outsidePoints[1].w) / (insidePoints[0].x - outsidePoints[1].x);
 
-					toReturn.push(new Polygon(extraPoint1, extraPoint2, insidePoints[0], bd));
+					toReturn.push(new Polygon(extraPoint1, extraPoint2, insidePoints[0], bd,wireFrameColor));
 				}
 			}
 
@@ -568,7 +576,7 @@
 
 
 				if (outsidePoints.length == 0) {
-					toReturn.push(new Polygon(insidePoints[0], insidePoints[1], insidePoints[2], bd));
+					toReturn.push(new Polygon(insidePoints[0], insidePoints[1], insidePoints[2], bd,wireFrameColor));
 				} else if (outsidePoints.length == 1) {
 					var extraPoint1: Point3d = new Point3d(0, 0, 0, 0, 0);
 					extraPoint1.x = outsidePoints[0].x - outsidePoints[0].y * (insidePoints[0].x - outsidePoints[0].x) / (insidePoints[0].y - outsidePoints[0].y);
@@ -588,9 +596,9 @@
 					extraPoint2.v = outsidePoints[0].v - outsidePoints[0].y * (insidePoints[1].v - outsidePoints[0].v) / (insidePoints[1].y - outsidePoints[0].y);
 					extraPoint2.w = outsidePoints[0].w - outsidePoints[0].y * (insidePoints[1].w - outsidePoints[0].w) / (insidePoints[1].y - outsidePoints[0].y);
 
-					toReturn.push(new Polygon(extraPoint1, insidePoints[0], insidePoints[1], bd));
+					toReturn.push(new Polygon(extraPoint1, insidePoints[0], insidePoints[1], bd,wireFrameColor));
 
-					toReturn.push(new Polygon(extraPoint2, extraPoint1, insidePoints[1], bd));
+					toReturn.push(new Polygon(extraPoint2, extraPoint1, insidePoints[1], bd,wireFrameColor));
 
 				} else if (outsidePoints.length == 2) {
 					var extraPoint1: Point3d = new Point3d(0, 0, 0, 0, 0);
@@ -611,7 +619,7 @@
 					extraPoint2.v = outsidePoints[1].v - outsidePoints[1].y * (insidePoints[0].v - outsidePoints[1].v) / (insidePoints[0].y - outsidePoints[1].y);
 					extraPoint2.w = outsidePoints[1].w - outsidePoints[1].y * (insidePoints[0].w - outsidePoints[1].w) / (insidePoints[0].y - outsidePoints[1].y);
 
-					toReturn.push(new Polygon(extraPoint1, extraPoint2, insidePoints[0], bd));
+					toReturn.push(new Polygon(extraPoint1, extraPoint2, insidePoints[0], bd,wireFrameColor));
 				}
 			}
 
@@ -634,7 +642,7 @@
 				}
 
 				if (outsidePoints.length == 0) {
-					toReturn.push(new Polygon(insidePoints[0], insidePoints[1], insidePoints[2], bd));
+					toReturn.push(new Polygon(insidePoints[0], insidePoints[1], insidePoints[2], bd,wireFrameColor));
 				} else if (outsidePoints.length == 1) {
 					var extraPoint1: Point3d = new Point3d(0, 0, 0, 0, 0);
 					extraPoint1.x = outsidePoints[0].x + (Engine.resolutionY - 1 - outsidePoints[0].y) * (insidePoints[0].x - outsidePoints[0].x) / (insidePoints[0].y - outsidePoints[0].y);
@@ -654,8 +662,8 @@
 					extraPoint2.v = outsidePoints[0].v + (Engine.resolutionY - 1 - outsidePoints[0].y) * (insidePoints[1].v - outsidePoints[0].v) / (insidePoints[1].y - outsidePoints[0].y);
 					extraPoint2.w = outsidePoints[0].w + (Engine.resolutionY - 1 - outsidePoints[0].y) * (insidePoints[1].w - outsidePoints[0].w) / (insidePoints[1].y - outsidePoints[0].y);
 
-					toReturn.push(new Polygon(extraPoint1, insidePoints[0], insidePoints[1], bd));
-					toReturn.push(new Polygon(extraPoint2, extraPoint1, insidePoints[1], bd));
+					toReturn.push(new Polygon(extraPoint1, insidePoints[0], insidePoints[1], bd,wireFrameColor));
+					toReturn.push(new Polygon(extraPoint2, extraPoint1, insidePoints[1], bd,wireFrameColor));
 
 				} else if (outsidePoints.length == 2) {
 
@@ -677,7 +685,7 @@
 					extraPoint2.v = outsidePoints[1].v + (Engine.resolutionY - 1 - outsidePoints[1].y) * (insidePoints[0].v - outsidePoints[1].v) / (insidePoints[0].y - outsidePoints[1].y);
 					extraPoint2.w = outsidePoints[1].w + (Engine.resolutionY - 1 - outsidePoints[1].y) * (insidePoints[0].w - outsidePoints[1].w) / (insidePoints[0].y - outsidePoints[1].y);
 
-					toReturn.push(new Polygon(extraPoint1, extraPoint2, insidePoints[0], bd));
+					toReturn.push(new Polygon(extraPoint1, extraPoint2, insidePoints[0], bd,wireFrameColor));
 				}
 			}
 
@@ -688,7 +696,7 @@
 		//checks if triangles are partially inside the frusom or if they are behind me. in that case we need to clip them (dont need to render what is behind me)
 		public function getZClippedTriangles(): Array {
 			var toReturn: Array = [];
-			toReturn.push(new Polygon(cameraPositions[0], cameraPositions[1], cameraPositions[2], bd));
+			toReturn.push(new Polygon(cameraPositions[0], cameraPositions[1], cameraPositions[2], bd,wireFrameColor));
 
 			var noTriangles: int;
 			var insidePoints: Array = []; // array of points3d
@@ -705,7 +713,7 @@
 
 				var pointsAreOutside: Array = [];
 				for (var j: int = 0; j < 3; j++) {
-					pointsAreOutside[j] = currentTriangle.getCameraPositions()[j].z < 0;//0(-Engine.activeCamera.zNear * 0.1)
+					pointsAreOutside[j] = currentTriangle.getCameraPositions()[j].z <0;//0(-Engine.activeCamera.zNear * 0.1)
 					if (pointsAreOutside[j]) {
 
 						outsidePoints.push(currentTriangle.getCameraPositions()[j]);
@@ -716,7 +724,7 @@
 				}
 
 				if (outsidePoints.length == 0) {
-					toReturn.push(new Polygon(insidePoints[0], insidePoints[1], insidePoints[2], bd));
+					toReturn.push(new Polygon(insidePoints[0], insidePoints[1], insidePoints[2], bd,wireFrameColor));
 				} else if (outsidePoints.length == 1) {
 					var extraPoint1: Point3d = new Point3d(0, 0, 0, 0, 0);
 					extraPoint1.x = outsidePoints[0].x + (0 - outsidePoints[0].z) * (insidePoints[0].x - outsidePoints[0].x) / (insidePoints[0].z - outsidePoints[0].z);
@@ -735,14 +743,14 @@
 					extraPoint2.w = outsidePoints[0].w + (0 - outsidePoints[0].z) * (insidePoints[1].w - outsidePoints[0].w) / (insidePoints[1].z - outsidePoints[0].z);
 
 					if (pointsAreOutside[0]) {
-						toReturn.push(new Polygon(extraPoint1, insidePoints[0], insidePoints[1], bd));
-						toReturn.push(new Polygon(extraPoint2, extraPoint1, insidePoints[1], bd));
+						toReturn.push(new Polygon(extraPoint1, insidePoints[0], insidePoints[1], bd,wireFrameColor));
+						toReturn.push(new Polygon(extraPoint2, extraPoint1, insidePoints[1], bd,wireFrameColor));
 					} else if (pointsAreOutside[1]) {
-						toReturn.push(new Polygon(extraPoint1, insidePoints[1], insidePoints[0], bd));
-						toReturn.push(new Polygon(extraPoint2, extraPoint1, insidePoints[0], bd));
+						toReturn.push(new Polygon(extraPoint1, insidePoints[1], insidePoints[0], bd,wireFrameColor));
+						toReturn.push(new Polygon(extraPoint2, extraPoint1, insidePoints[0], bd,wireFrameColor));
 					} else if (pointsAreOutside[2]) {
-						toReturn.push(new Polygon(extraPoint1, insidePoints[0], insidePoints[1], bd));
-						toReturn.push(new Polygon(extraPoint2, extraPoint1, insidePoints[1], bd));
+						toReturn.push(new Polygon(extraPoint1, insidePoints[0], insidePoints[1], bd,wireFrameColor));
+						toReturn.push(new Polygon(extraPoint2, extraPoint1, insidePoints[1], bd,wireFrameColor));
 					}
 				} else if (outsidePoints.length == 2) {
 					var extraPoint1: Point3d = new Point3d(0, 0, 0, 0, 0);
@@ -762,11 +770,11 @@
 					extraPoint2.w = outsidePoints[1].w + (0 - outsidePoints[1].z) * (insidePoints[0].w - outsidePoints[1].w) / (insidePoints[0].z - outsidePoints[1].z);
 
 					if (!pointsAreOutside[0]) {
-						toReturn.push(new Polygon(extraPoint2, insidePoints[0], extraPoint1, bd));
+						toReturn.push(new Polygon(extraPoint2, insidePoints[0], extraPoint1, bd,wireFrameColor));
 					} else if (!pointsAreOutside[1]) {
-						toReturn.push(new Polygon(extraPoint1, insidePoints[0], extraPoint2, bd));
+						toReturn.push(new Polygon(extraPoint1, insidePoints[0], extraPoint2, bd,wireFrameColor));
 					} else if (!pointsAreOutside[2]) {
-						toReturn.push(new Polygon(extraPoint2, insidePoints[0], extraPoint1, bd));
+						toReturn.push(new Polygon(extraPoint2, insidePoints[0], extraPoint1, bd,wireFrameColor));
 					}
 
 				}

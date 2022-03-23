@@ -72,7 +72,12 @@
 						if(hit)
 						{
 							Engine.removeEntity(this);
-							Engine.removeEntity(go);
+							if(go.destructable)
+							{
+								Engine.removeEntity(go);
+							}
+							
+							
 						}
 					}
 				}

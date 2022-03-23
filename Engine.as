@@ -17,6 +17,7 @@
 
 		public static var resolutionX: Number;
 		public static var resolutionY: Number;
+		public static var wireFrameColor:uint = 0xffffff;
 
 
 		public static var moveSpeed: Number = 2;

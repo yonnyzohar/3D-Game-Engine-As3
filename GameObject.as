@@ -9,14 +9,49 @@
 		public var bd:BitmapData;
 		public var transformMatrix:Matrix4x4;
 		public var boundingBox:Object;
+		public var destructable:Boolean = true;
 		
 		public function GameObject() {
-			// constructor code
-
 			getBoundingBox(polygons);
+			centerMesh(polygons);
+			getBoundingBox(polygons);
+			
 
 			transformMatrix = new Matrix4x4();
 			transformMatrix.createFromTransform(position, rotation, scale);
+		}
+
+		public function setFrameColor(color:uint):void
+		{
+
+			for(var i:int = 0; i < polygons.length; i++)
+			{
+				var polygon:Polygon = polygons[i];
+				polygon.setFrameColor(color);
+			}
+		}
+
+		function centerMesh(_polygons:Array):void
+		{
+			var bb = boundingBox;
+			for(var i:int = 0; i < _polygons.length; i++)
+			{
+				var polygon:Polygon = _polygons[i];
+				for(var j:int = 0; j < 3; j++)
+				{
+					var p:Point3d = polygon.localPositions[j];
+					
+					p.x -= bb.minX;
+					p.x -= (bb.xDist/2);
+					
+					p.y -= bb.minY;
+					//p.y -= (bb.yDist/2);
+
+					p.z -= bb.minZ;
+					p.z -= (bb.zDist/2);
+				}
+			}
+		
 		}
 
 		function getBoundingBox(_polygons:Array):void
@@ -73,7 +108,16 @@
 				"frontBtmRight" : new Point3d(maxX, minY, minZ),
 				"frontTopRight" : new Point3d(maxX, maxY, minZ),
 				"backTopRight"  : new Point3d(maxX, maxY, maxZ),
-				"backBtmRight"  : new Point3d(maxX, minY, maxZ)
+				"backBtmRight"  : new Point3d(maxX, minY, maxZ),
+				"minX"          : minX,
+				"maxX"          : maxX,
+				"xDist"         : maxX - minX,
+				"minY"          : minY,
+				"maxY"          : maxY,
+				"yDist"         : maxY - minY,
+				"minZ"          : minZ,
+				"maxZ"          : maxZ,
+				"zDist"         : maxZ - minZ
 			};
 		}
 
@@ -166,27 +210,6 @@
 
 
 			rotation = Quaternion.RotateTowards(currentRotation,rotTowardsCam, 1 );
-
-
-			/*
-			var diff:Quaternion = new Quaternion(
-					(rotTowardsCam.x - currentRotation.x) , 
-					(rotTowardsCam.y - currentRotation.y),  
-					(rotTowardsCam.z - currentRotation.z) , 
-					(rotTowardsCam.w - currentRotation.w) 
-				);
-			
-			if(Math.abs(diff.x) > 0.01 || Math.abs(diff.y) > 0.01 || Math.abs(diff.z) > 0.01 || Math.abs(diff.w) > 0.01 )
-			{
-				rotation.x += (diff.x * rotationSpeed);
-				rotation.y += (diff.y * rotationSpeed);
-				rotation.z += (diff.z * rotationSpeed);
-				rotation.w += (diff.w * rotationSpeed);
-
-			
-				trace(rotation.x, rotation.y, rotation.z, rotation.w);
-			}
-			*/
 			
 		}
 

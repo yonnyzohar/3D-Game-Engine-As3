@@ -55,15 +55,15 @@
 			transformMatrix = new Matrix4x4();
 			transformMatrix.createFromTransform(position, rotation, scale);
 			zNear = (Engine.resolutionX / 2.0) / Math.tan(EngineMath.degreesToRad(fieldOfView / 2.0));
-			trace(zNear);
 			aspectRatio = Engine.resolutionX / Engine.resolutionY;
 			
 			//get the field of view from top to bottom
 			var oneDivAspectRatio:Number = 1.0/aspectRatio;
 			fovY = 2 * Math.atan(Math.tan(EngineMath.degreesToRad(fieldOfView) / 2.0) * oneDivAspectRatio);
 
-
-			positionMinusZ = new Point3d(position.x, position.y, position.z - zNear);
+			
+			positionMinusZ = new Point3d(position.x, position.y, position.z);
+			position.z += zNear;
 
 		}
 	
@@ -84,21 +84,72 @@
 			return rotation;
 		}
 
+		private function collidingPlus(dir:Vector3, ms:Number):Boolean
+		{
+			var isColission:Boolean = false;
+			var p:Point3d = new Point3d(position.x + (dir.x *ms), position.y + (dir.y *ms), position.z + (dir.z *ms)  );
+
+			outer : for(var i:int = 0; i < Engine.gO.length; i++)
+			{
+				var go:GameObject = Engine.gO[i];
+				var boundingBox:Object = go.boundingBox;
+				for(var k:String in boundingBox)
+				{
+					if(boundingBox[k] is Point3d)
+					{
+						var edgeVertex:Point3d = boundingBox[k];
+						isColission = go.checkColission(Engine.translate(edgeVertex, p));
+						if(isColission)
+						{
+							break outer;
+						}
+
+					}
+				}
+				
+			}
+			return isColission;
+			
+		}
+
+		private function collidingMinus(dir:Vector3, ms:Number):Boolean
+		{
+			var isColission:Boolean = false;
+			var mpZ:Point3d = new Point3d(positionMinusZ.x - (dir.x *ms), positionMinusZ.y - (dir.y *ms), positionMinusZ.z - (dir.z *ms)  );
+
+			outer : for(var i:int = 0; i < Engine.gO.length; i++)
+			{
+				var go:GameObject = Engine.gO[i];
+				var boundingBox:Object = go.boundingBox;
+				for(var k:String in boundingBox)
+				{
+					if(boundingBox[k] is Point3d)
+					{
+						var edgeVertex:Point3d = boundingBox[k];
+						isColission = go.checkColission(Engine.translate(edgeVertex, mpZ));
+						if(isColission)
+						{
+							break outer;
+						}
+						
+					}
+				}
+				
+			}
+			return isColission;
+			
+		}
 
 
 		public function update(elapsedTime:Number): void {
 
-			
-			
-			
 			var COS: Number;
 			var SIN: Number;
 			var MATH_DEG_TO_RAD: Number = 0.0174532925;
 			var moveVector: Point3d;
 			var quat1: Quaternion;
 			
-			
-			
+		
 			var ms:Number = Engine.moveSpeed * elapsedTime;
 			var rs:Number = Engine.rotateSpeed * elapsedTime;
 			ms /= 2;
@@ -119,13 +170,21 @@
 				positionMinusZ.z += deltaZ;
 				*/
 				var forward:Vector3 = transformMatrix.getForwardVector();
-				position.x += (forward.x *ms);
-				position.y += (forward.y *ms);
-				position.z += (forward.z *ms);
+				if(!collidingPlus(forward, ms))
+				{
+					
+					position.x += (forward.x *ms);
+					position.y += (forward.y *ms);
+					position.z += (forward.z *ms);
 
-				positionMinusZ.x += (forward.x *ms);
-				positionMinusZ.y += (forward.y *ms);
-				positionMinusZ.z += (forward.z *ms);
+					positionMinusZ.x += (forward.x *ms);
+					positionMinusZ.y += (forward.y *ms);
+					positionMinusZ.z += (forward.z *ms);
+
+
+				}
+
+				
 			}
 
 			if (Model.S) {
@@ -143,13 +202,17 @@
 				positionMinusZ.z -= deltaZ;
 				*/
 				var forward:Vector3 = transformMatrix.getForwardVector();
-				position.x -= (forward.x *ms);
-				position.y -= (forward.y *ms);
-				position.z -= (forward.z *ms);
+				if(!collidingMinus(forward, ms))
+				{
+					position.x -= (forward.x *ms);
+					position.y -= (forward.y *ms);
+					position.z -= (forward.z *ms);
 
-				positionMinusZ.x -= (forward.x *ms);
-				positionMinusZ.y -= (forward.y *ms);
-				positionMinusZ.z -= (forward.z *ms);
+					positionMinusZ.x -= (forward.x *ms);
+					positionMinusZ.y -= (forward.y *ms);
+					positionMinusZ.z -= (forward.z *ms);
+				}
+				
 				
 			}
 
@@ -168,13 +231,17 @@
 				positionMinusZ.z += deltaZ;
 				*/
 				var right:Vector3 = transformMatrix.getRightVector();
-				position.x += (right.x *ms);
-				position.y += (right.y *ms);
-				position.z += (right.z *ms);
+				if(!collidingPlus(right, ms))
+				{
+					position.x += (right.x *ms);
+					position.y += (right.y *ms);
+					position.z += (right.z *ms);
 
-				positionMinusZ.x += (right.x *ms);
-				positionMinusZ.y += (right.y *ms);
-				positionMinusZ.z += (right.z *ms);
+					positionMinusZ.x += (right.x *ms);
+					positionMinusZ.y += (right.y *ms);
+					positionMinusZ.z += (right.z *ms);
+				}
+				
 				
 			}
 
@@ -196,17 +263,21 @@
 				positionMinusZ.z -= deltaZ;
 				*/
 				var right:Vector3 = transformMatrix.getRightVector();
-				position.x -= (right.x *ms);
-				position.y -= (right.y *ms);
-				position.z -= (right.z *ms);
+				if(!collidingMinus(right, ms))
+				{
+					position.x -= (right.x *ms);
+					position.y -= (right.y *ms);
+					position.z -= (right.z *ms);
 
-				positionMinusZ.x -= (right.x *ms);
-				positionMinusZ.y -= (right.y *ms);
-				positionMinusZ.z -= (right.z *ms);
+					positionMinusZ.x -= (right.x *ms);
+					positionMinusZ.y -= (right.y *ms);
+					positionMinusZ.z -= (right.z *ms);
+				}
+				
 				
 			}
 
-			/*
+			
 			if (Model.up) {
 
 				moveVector = new Point3d(-rs * MATH_DEG_TO_RAD, 0, 0);
@@ -219,7 +290,7 @@
 				quat1 = EngineMath.eulerToQuat(moveVector);
 				rotation = EngineMath.quatMul(rotation, quat1);
 			}
-			*/
+			/**/
 
 			if (Model.right) {
 
