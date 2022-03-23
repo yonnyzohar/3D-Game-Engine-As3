@@ -2,17 +2,18 @@
 {
 	import flash.display.BitmapData;
 
-	public class Bullet extends GameObject {
+	public class Shrapnel extends GameObject {
 
 		var dist:int = 0;
+		var speed:Number;
 
-		public function Bullet(_positon: Point3d, _rotation: Quaternion, _scale: Point3d, _bd: BitmapData) {
+		public function Shrapnel(_positon: Point3d, _rotation: Quaternion, _scale: Point3d, _bd: BitmapData, _speed:Number) {
 			// constructor code
 			position = _positon; //
 			rotation = _rotation; //;
 			scale = _scale;
-			scale.x = scale.y = scale.z = 0.05;
 			bd = _bd;
+			speed = _speed;
 		
 			polygons = [
 			
@@ -40,53 +41,34 @@
 			];
 			
 
-			super();
+			super(false);
 		}
 
 		
 
 		override public function update(elapsedTime:Number): void {
 			
-
-			var ms:Number = Engine.moveSpeed * elapsedTime;
-			
-			dist++;
-			if(dist < 200)
+			try
 			{
-				moveForward(ms * 25);
-				//if(collide)
-				{
-					for(var i:int = 0; i < Engine.gO.length; i++)
-					{
-						var go:GameObject = Engine.gO[i];
-						if(go != this)
-						{
-							var hit:Boolean = go.checkColission(position);
-							if(hit)
-							{
-								Engine.removeEntity(this);
-								if(go.destructable)
-								{
-									
-									Engine.removeEntity(go);
-									new Explosion(go.position);
-
-								}
-								
-								
-							}
-						}
-					}
-				}
-
+				var ms:Number = Engine.moveSpeed * elapsedTime * speed;
 				
+				dist++;
+				if(dist < 50)
+				{
+					moveForward(ms);
+				}
+				else
+				{
+					Engine.removeEntity(this);
+				}
+				
+				super.update(elapsedTime)
 			}
-			else
+			catch(e:Error)
 			{
-				Engine.removeEntity(this);
+
 			}
 			
-			super.update(elapsedTime)
 
 		}
 	}

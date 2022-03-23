@@ -3,6 +3,8 @@
 	import assets.Bullet;
 
 	public class Player extends GameCamera {
+		var coolDown:int = 10;
+		var c:int = 0;
 		public function Player(_theStage: Stage, _position: Point3d, _rotation: Quaternion) {
 			super(_theStage, _position, _rotation);
 		}
@@ -10,14 +12,24 @@
 
 		override public function update(elapsedTime:Number): void 
 		{
+			if(c != 0)
+			{
+				c--;
+			}
 			if(InputHandler.SPACE)
 			{
-				var bullet: Bullet = new Bullet(
+				if(c == 0)
+				{
+					var bullet: Bullet = new Bullet(
 					new Point3d(positionMinusZ.x,positionMinusZ.y,positionMinusZ.z), 
 					new Quaternion(rotation.x, rotation.y, rotation.z, rotation.w), 
 					new Point3d(0.05,0.05,0.05), 
 					null);
-				Engine.gO.push(bullet);
+					Engine.gO.push(bullet);
+					bullet.setFrameColor( 0xff00ff);
+					c = coolDown;
+				}
+				
 			}
 			super.update(elapsedTime);
 			

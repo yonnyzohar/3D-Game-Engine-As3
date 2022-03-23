@@ -10,15 +10,35 @@
 		public var transformMatrix:Matrix4x4;
 		public var boundingBox:Object;
 		public var destructable:Boolean = true;
+		public var _collideable:Boolean = true;
 		
-		public function GameObject() {
-			getBoundingBox(polygons);
-			centerMesh(polygons);
-			getBoundingBox(polygons);
+		public function GameObject(_c:Boolean = true) {
+			_collideable = _c;
+			if(_collideable)
+			{
+				getBoundingBox(polygons);
+				centerMesh(polygons);
+				getBoundingBox(polygons);
+			}
+			
 			
 
 			transformMatrix = new Matrix4x4();
 			transformMatrix.createFromTransform(position, rotation, scale);
+		}
+
+		public function get collideable():Boolean
+		{
+			return _collideable;
+		}
+
+		public function set collideable(val:Boolean):void
+		{
+			_collideable = val;
+			if(val == false)
+			{
+				boundingBox = null;
+			}
 		}
 
 		public function setFrameColor(color:uint):void
@@ -124,6 +144,10 @@
 		public function checkColission(targetPos:Point3d):Boolean
 		{
 			var bb = boundingBox;
+			if(bb == null)
+			{
+				return false;
+			}
 			var frontBtmLeft  :Point3d = new Point3d(position.x + bb.frontBtmLeft.x,  position.y + bb.frontBtmLeft.y,   position.z + bb.frontBtmLeft.z);
 			var frontTopLeft  :Point3d = new Point3d(position.x + bb.frontTopLeft.x,  position.y + bb.frontTopLeft.y,   position.z + bb.frontTopLeft.z);
 			var backBtmLeft   :Point3d = new Point3d(position.x + bb.backBtmLeft.x,   position.y  + bb.backBtmLeft.y,   position.z  + bb.backBtmLeft.z);

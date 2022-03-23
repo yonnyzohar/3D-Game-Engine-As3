@@ -71,19 +71,23 @@
 			{
 				var go:GameObject = Engine.gO[i];
 				var boundingBox:Object = go.boundingBox;
-				for(var k:String in boundingBox)
+				if(boundingBox)
 				{
-					if(boundingBox[k] is Point3d)
+					for(var k:String in boundingBox)
 					{
-						var edgeVertex:Point3d = boundingBox[k];
-						isColission = go.checkColission(Engine.translate(edgeVertex, p));
-						if(isColission)
+						if(boundingBox[k] is Point3d)
 						{
-							break outer;
-						}
+							var edgeVertex:Point3d = boundingBox[k];
+							isColission = go.checkColission(Engine.translate(edgeVertex, p));
+							if(isColission)
+							{
+								break outer;
+							}
 
+						}
 					}
 				}
+				
 				
 			}
 			return isColission;
@@ -99,19 +103,23 @@
 			{
 				var go:GameObject = Engine.gO[i];
 				var boundingBox:Object = go.boundingBox;
-				for(var k:String in boundingBox)
+				if(boundingBox)
 				{
-					if(boundingBox[k] is Point3d)
+					for(var k:String in boundingBox)
 					{
-						var edgeVertex:Point3d = boundingBox[k];
-						isColission = go.checkColission(Engine.translate(edgeVertex, mpZ));
-						if(isColission)
+						if(boundingBox[k] is Point3d)
 						{
-							break outer;
+							var edgeVertex:Point3d = boundingBox[k];
+							isColission = go.checkColission(Engine.translate(edgeVertex, mpZ));
+							if(isColission)
+							{
+								break outer;
+							}
+							
 						}
-						
 					}
 				}
+				
 				
 			}
 			return isColission;
