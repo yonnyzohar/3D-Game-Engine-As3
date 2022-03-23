@@ -7,18 +7,7 @@
 
 	public class GameCamera {
 
-		private var Model: Object = {
-			up: false,
-			down: false,
-			left: false,
-			right: false,
-			W: false,
-			S: false,
-			A: false,
-			D: false,
-			E: false,
-			Q: false
-		};
+		
 		private var counter: Number = 0;
 		private var iterator:int = 0;
 
@@ -37,9 +26,7 @@
 
 		public var aspectRatio:Number ;
 		public var fovY:Number;
-		private var lastMouseX:Number = 0;
-		private var lastMouseY:Number = 0;
-		private var mouseIsDown:Boolean = false;
+		
 
 		public function GameCamera(_theStage: Stage, _position: Point3d, _rotation: Quaternion) {
 			// constructor code
@@ -47,10 +34,7 @@
 			position = _position;
 			rotation = _rotation;
 			scale = new Vector3(1, 1, 1);
-			_theStage.addEventListener(KeyboardEvent.KEY_DOWN, myKeyDown);
-			_theStage.addEventListener(KeyboardEvent.KEY_UP, myKeyUp);
-			_theStage.addEventListener(MouseEvent.MOUSE_DOWN, mouseDown);
-			_theStage.addEventListener(MouseEvent.MOUSE_UP, mouseUp);
+			
 			
 			transformMatrix = new Matrix4x4();
 			transformMatrix.createFromTransform(position, rotation, scale);
@@ -67,13 +51,7 @@
 
 		}
 	
-		private function mouseDown(e:MouseEvent):void{
-			mouseIsDown = true;
-		}
 		
-		private function mouseUp(e:MouseEvent):void{
-			mouseIsDown = false;
-		}
 
 
 		public function getPosition(): Point3d {
@@ -156,7 +134,7 @@
 
 
 
-			if (Model.W) {
+			if (InputHandler.W) {
 				/*
 				var deltaX:Number = ms * (rotation.x * rotation.z + rotation.w * rotation.y);
 				var deltaY:Number = ms * (rotation.y * rotation.z - rotation.w * rotation.x);
@@ -187,7 +165,7 @@
 				
 			}
 
-			if (Model.S) {
+			if (InputHandler.S) {
 				/*
 				var deltaX:Number = ms * (rotation.x * rotation.z + rotation.w * rotation.y);
 				var deltaY:Number = ms * (rotation.y * rotation.z - rotation.w * rotation.x);
@@ -216,7 +194,7 @@
 				
 			}
 
-			if (Model.D) {
+			if (InputHandler.D) {
 				/*
 				var deltaX:Number = (ms/2) - ms * (rotation.y * rotation.y + rotation.z * rotation.z);
 				var deltaY:Number = ms * (rotation.x * rotation.y + rotation.w * rotation.z);
@@ -246,7 +224,7 @@
 			}
 
 
-			if (Model.A) {
+			if (InputHandler.A) {
 				//strafe left
 				//left vector
 				/*
@@ -278,21 +256,21 @@
 			}
 
 			
-			if (Model.up) {
+			if (InputHandler.up) {
 
 				moveVector = new Point3d(-rs * MATH_DEG_TO_RAD, 0, 0);
 				quat1 = EngineMath.eulerToQuat(moveVector);
 				rotation = EngineMath.quatMul(rotation, quat1);
 			}
 
-			if (Model.down) {
+			if (InputHandler.down) {
 				moveVector = new Point3d(rs * MATH_DEG_TO_RAD, 0, 0);
 				quat1 = EngineMath.eulerToQuat(moveVector);
 				rotation = EngineMath.quatMul(rotation, quat1);
 			}
 			/**/
 
-			if (Model.right) {
+			if (InputHandler.right) {
 
 				//rotation.y += Engine.rotateSpeed * elapsedTime;
 
@@ -305,7 +283,7 @@
 
 			}
 
-			if (Model.left) {
+			if (InputHandler.left) {
 				//rotation.y -= Engine.rotateSpeed * elapsedTime;
 
 				//var quat:Quaternion  = Engine.eulerToQuat(rotation);
@@ -317,7 +295,7 @@
 			}
 
 			/*
-			if (Model.Q) {
+			if (InputHandler.Q) {
 				//rotation.y -= Engine.rotateSpeed * elapsedTime;
 
 				//var quat:Quaternion  = Engine.eulerToQuat(rotation);
@@ -327,7 +305,7 @@
 				//rotation = Engine.quatToEuler(res);
 			}
 
-			if (Model.E) {
+			if (InputHandler.E) {
 				//rotation.y -= Engine.rotateSpeed * elapsedTime;
 
 				//var quat:Quaternion  = Engine.eulerToQuat(rotation);
@@ -386,112 +364,7 @@
 
 		
 
-		private function myKeyDown(e: KeyboardEvent): void {
-
-			if (e.keyCode == Keyboard.UP) {
-				Model.up = true;
-				Model.down = false;
-			}
-			if (e.keyCode == Keyboard.DOWN) {
-
-				Model.down = true;
-				Model.up = false;
-			}
-			if (e.keyCode == Keyboard.LEFT) {
-
-				Model.left = true;
-				Model.right = false;
-			}
-			if (e.keyCode == Keyboard.RIGHT) {
-
-				Model.right = true;
-				Model.left = false;
-			}
-			if(e.keyCode == Keyboard.SPACE)
-			{
-				onSpacePressed();
-			}
-
-
-			if (e.keyCode == Keyboard.W) {
-				Model.W = true;
-			}
-			if (e.keyCode == Keyboard.A) {
-				Model.A = true;
-			}
-
-			if (e.keyCode == Keyboard.S) {
-				Model.S = true;
-			}
-
-			if (e.keyCode == Keyboard.D) {
-				Model.D = true;
-			}
-			if (e.keyCode == Keyboard.E) {
-				Model.E = true;
-			}
-			if (e.keyCode == Keyboard.Q) {
-				Model.Q = true;
-			}
-
-		}
-		protected function onSpacePressed():void
-		{
-
-		}
-
-		protected function onSpaceReleased():void
-		{
-
-		}
-
-
-		private function myKeyUp(e: KeyboardEvent): void {
-
-			if (e.keyCode == Keyboard.UP) {
-				Model.up = false;
-			}
-			if (e.keyCode == Keyboard.DOWN) {
-
-				Model.down = false;
-			}
-			if (e.keyCode == Keyboard.LEFT) {
-
-				Model.left = false;
-			}
-			if (e.keyCode == Keyboard.RIGHT) {
-
-				Model.right = false;
-			}
-
-			if(e.keyCode == Keyboard.SPACE)
-			{
-				onSpaceReleased();
-			}
-
-
-			if (e.keyCode == Keyboard.W) {
-				Model.W = false;
-			}
-			if (e.keyCode == Keyboard.A) {
-				Model.A = false;
-			}
-
-			if (e.keyCode == Keyboard.S) {
-				Model.S = false;
-			}
-
-			if (e.keyCode == Keyboard.D) {
-				Model.D = false;
-			}
-			if (e.keyCode == Keyboard.E) {
-				Model.E = false;
-			}
-			if (e.keyCode == Keyboard.Q) {
-				Model.Q = false;
-			}
-
-		}
+		
 
 		
 

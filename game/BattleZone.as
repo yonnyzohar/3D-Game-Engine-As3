@@ -97,6 +97,7 @@
 					if(map[row][col] == 4)
 					{
 						position = new Point3d(_x, 50, _z);
+
 						rotation = new Quaternion(0, 0, 0, 1);
 						scale = new Point3d(1, 1, 1);
 						var c: Cube = new Cube(position, rotation, scale, arr[0]);
@@ -117,7 +118,7 @@
 			activeCamera = player as GameCamera;
 		}
 
-		private function drawLine(start:Vector3, end:Vector3):void
+		private function drawLine(start:Vector3, end:Vector3, color:uint = 0xffffff):void
 		{
 			var distanceH: Number = EngineMath.getDistance(start, end);
 			var distanceX: Number = end.x - start.x;
@@ -130,7 +131,7 @@
 			var startY: Number = start.y;
 
 			for (var i: int = 0; i < distanceH; i++) {
-				Engine.bd.setPixel(startX, startY, 0xffffff);
+				Engine.bd.setPixel(startX, startY, color);
 				startX += cos;
 				startY += sin;
 			}
@@ -182,15 +183,22 @@
 
 			
 			}
+
+			var color:uint = 0xffff00;
+			if(InputHandler.SPACE)
+			{
+				color = 0xff0000;
+			}
+
 			var cX:int = resolutionX/2;
 			var cY:int = resolutionY/2;
 			var h:int = 20;
 
-			drawLine( new Vector3(cX-h,cY,0), new Vector3(cX-(h/2),cY,0));
-			drawLine( new Vector3(cX+(h/2),cY,0), new Vector3(cX+h,cY,0));
+			drawLine( new Vector3(cX-h,cY,0), new Vector3(cX-(h/2),cY,0),color);
+			drawLine( new Vector3(cX+(h/2),cY,0), new Vector3(cX+h,cY,0),color);
 
-			drawLine( new Vector3(cX,cY-h,0), new Vector3(cX,cY -h/2,0));
-			drawLine( new Vector3(cX,cY+h/2,0), new Vector3(cX,cY +h,0));
+			drawLine( new Vector3(cX,cY-h,0), new Vector3(cX,cY -h/2,0),color);
+			drawLine( new Vector3(cX,cY+h/2,0), new Vector3(cX,cY +h,0),color);
 			
 			//draw floor line
 			/*

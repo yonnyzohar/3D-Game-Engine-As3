@@ -35,7 +35,7 @@
 		public static var gO:Array ;
 
 		public static var activeCamera:GameCamera;
-		
+		private var inputHandler:InputHandler;
 
 
 		public function Engine() {
@@ -61,7 +61,7 @@
 			initCamera();
 
 			stage.addEventListener(Event.ENTER_FRAME, update);
-
+			inputHandler = new InputHandler(stage);
 
 
 		}
