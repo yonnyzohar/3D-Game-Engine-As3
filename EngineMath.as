@@ -18,6 +18,7 @@ package {
 		public static var DOWN: Vector3 = new Vector3(0, -1, 0);
 		public static var FORWARD: Vector3 = new Vector3(0, 0, 1);
 		public static var BACK: Vector3 = new Vector3(0, 0, -1);
+		public static var MATH_DEG_TO_RAD: Number = 0.0174532925;
 
 		//get an euler direction vector, transform it to quaternion
 		public static function eulerToQuat(_rotation: Point3d): Quaternion {
@@ -89,7 +90,10 @@ package {
 			return _result;
 		}
 
-
+		public static function getAngleEuler(from: Vector3, to: Vector3): Number {
+			var angle: Number = Math.atan2(to.x - from.x, to.z - from.z);
+			return angle;
+		}
 
 
 		public static function quatRotateAxis(_axis: Point3d, _angle: Number): Quaternion {
@@ -159,7 +163,7 @@ package {
 			var fY: Number = f_normalized.y; //y
 			var fZ: Number = f_normalized.z; //z
 
-			var _result: Quaternion = new Quaternion(0, 0, 0, 0);
+			var _result: Quaternion = new Quaternion(0, 0, 0, 1);
 			////
 			var num8: Number = (rX + uY) + fZ;
 			if (num8 > 0.0) {
@@ -169,28 +173,36 @@ package {
 				_result.x = (uZ - fY) * num;
 				_result.y = (fX - rZ) * num;
 				_result.z = (rY - uX) * num;
-			} else if ((rX >= uY) && (rX >= fZ)) {
+				return _result;
+			} 
+			if ((rX >= uY) && (rX >= fZ)) 
+			{
 				var num7: Number = Math.sqrt(((1.0 + rX) - uY) - fZ);
 				var num4: Number = 0.5 / num7;
 				_result.x = 0.5 * num7;
 				_result.y = (rY + uX) * num4;
 				_result.z = (rZ + fX) * num4;
 				_result.w = (uZ - fY) * num4;
-			} else if (uY > fZ) {
+				return _result;
+			} 
+			if (uY > fZ) 
+			{
 				var num6: Number = Math.sqrt(((1.0 + uY) - rX) - fZ);
 				var num3: Number = 0.5 / num6;
 				_result.x = (uX + rY) * num3;
 				_result.y = 0.5 * num6;
 				_result.z = (fY + uZ) * num3;
 				_result.w = (fX - rZ) * num3;
-			} else {
-				var num5: Number = Math.sqrt(((1.0 + fZ) - rX) - uY);
-				var num2: Number = 0.5 / num5;
-				_result.x = (fX + rZ) * num2;
-				_result.y = (fY + uZ) * num2;
-				_result.z = 0.5 * num5;
-				_result.w = (rY - uX) * num2;
-			}
+				return _result;
+			} 
+
+			var num5: Number = Math.sqrt(((1.0 + fZ) - rX) - uY);
+			var num2: Number = 0.5 / num5;
+			_result.x = (fX + rZ) * num2;
+			_result.y = (fY + uZ) * num2;
+			_result.z = 0.5 * num5;
+			_result.w = (rY - uX) * num2;
+			
 
 			return _result;
 
@@ -217,9 +229,9 @@ package {
 
 		public static function vec3Cross(_a: Vector3, _b: Vector3): Vector3 {
 			var _result: Vector3 = new Vector3(0, 0, 0);
-			_result.x = _a.y * _b.z - _a.z * _b.y;
-			_result.y = _a.z * _b.x - _a.x * _b.z;
-			_result.z = _a.x * _b.y - _a.y * _b.x;
+			_result.x = (_a.y * _b.z) - (_a.z * _b.y);
+			_result.y = (_a.z * _b.x) - (_a.x * _b.z);
+			_result.z = (_a.x * _b.y) - (_a.y * _b.x);
 			return _result;
 		}
 
@@ -417,10 +429,19 @@ package {
 			
 			return _result;
 		}
+
+
+		
+
+
+
+
+		
 	}
 
 }
 
+	
 /*
 public static function float4x4_mul_scalar(float4x4_t* __restrict _result, const float4x4_t* __restrict _a, float scalar)
 		{
@@ -464,6 +485,75 @@ namespace bx
 			Reverse,
 		};
 	};
+
+	inline void quatLookAt(float* __restrict _result, float* __restrict forward, float* __restrict up)
+    {
+        //normalize F
+        float f_normalized[3];
+        bx::vec3Norm(f_normalized, forward); //lookAt
+        
+        float right[3];
+        bx::vec3Cross(right, up, f_normalized );
+        
+        //normalize R
+        float r_normalized[3];
+        bx::vec3Norm(r_normalized, right);
+        
+        float u_normalized[3];
+        bx::vec3Cross(u_normalized, f_normalized, r_normalized );
+        
+        float rX = r_normalized[0];//x
+        float rY = r_normalized[1];//y
+        float rZ = r_normalized[2];//z
+        
+        float uX = u_normalized[0];//x
+        float uY = u_normalized[1];//y
+        float uZ = u_normalized[2];//x
+        
+        float fX = f_normalized[0];//x
+        float fY = f_normalized[1];//y
+        float fZ = f_normalized[2];//z
+        
+        
+        ////
+        float num8 = (rX + uY) + fZ;
+        if (num8 > 0.0f)
+        {
+            float num = (float)sqrt(num8 + 1.0f);
+            _result[3] = num * 0.5f;
+            num = 0.5f / num;
+            _result[0] = (uZ - fY) * num;
+            _result[1] = (fX - rZ) * num;
+            _result[2] = (rY - uX) * num;
+        }
+        else if ((rX >= uY) && (rX >= fZ))
+        {
+            float num7 = (float)sqrt(((1.0f + rX) - uY) - fZ);
+            float num4 = 0.5f / num7;
+            _result[0] = 0.5f * num7;
+            _result[1] = (rY + uX) * num4;
+            _result[2] = (rZ + fX) * num4;
+            _result[3] = (uZ - fY) * num4;
+        }
+        else if (uY > fZ)
+        {
+            float num6 = (float)sqrt(((1.0f + uY) - rX) - fZ);
+            float num3 = 0.5f / num6;
+            _result[0] = (uX + rY) * num3;
+            _result[1] = 0.5f * num6;
+            _result[2] = (fY + uZ) * num3;
+            _result[3] = (fX - rZ) * num3;
+        }
+        else
+        {
+            float num5 = (float)sqrt(((1.0f + fZ) - rX) - uY);
+            float num2 = 0.5f / num5;
+            _result[0] = (fX + rZ) * num2;
+            _result[1] = (fY + uZ) * num2;
+            _result[2] = 0.5f * num5;
+            _result[3] = (rY - uX) * num2;
+        }
+    }
 
 	inline float toRad(float _deg)
 	{
@@ -1064,16 +1154,7 @@ namespace bx
 	}
     
     
-	inline void quatRotateAxis(float* __restrict _result, const float* _axis, float _angle)
-	{
-		const float ha = _angle * 0.5f;
-		const float ca = fcos(ha);
-		const float sa = fsin(ha);
-		_result[0] = _axis[0] * sa;
-		_result[1] = _axis[1] * sa;
-		_result[2] = _axis[2] * sa;
-		_result[3] = ca;
-	}
+	
     
     inline void quatToAxisAngle(float*  _axis, float* _angle, const float* __restrict quat)
     {
@@ -1091,24 +1172,7 @@ namespace bx
         *_angle = angle;
     }
     
-    inline void EulerToQuat(float* __restrict _result, float rotX, float rotY, float rotZ)
-    {
-        float xa[3] = {1,0,0};
-        float ya[3] = {0,1,0};
-        float za[3] = {0,0,1};
-        
-        float qx[4];
-        float qy[4];
-        float qz[4];
-        float qt[4];
-        
-        quatRotateAxis(qx, xa, rotX);
-        quatRotateAxis(qy, ya, rotY);
-        quatRotateAxis(qz, za, rotZ);
-        
-        quatMul(qt, qy, qx);
-        quatMul(_result, qz, qt);
-    }
+    
 
 
 	inline void quatRotateX(float* _result, float _ax)

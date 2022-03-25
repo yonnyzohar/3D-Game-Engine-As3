@@ -160,8 +160,8 @@
 
 			if( targetPos.x >= frontBtmLeft.x && 
 				targetPos.x <= backTopRight.x &&
-				targetPos.y >= frontBtmLeft.y &&
 				targetPos.y <= frontTopLeft.y &&
+				targetPos.y >= frontBtmLeft.y &&
 				targetPos.z >= frontBtmRight.z &&
 				targetPos.z <= backBtmLeft.z
 
@@ -199,6 +199,10 @@
 			//move forwards - some bug here with object shrinking
 			
 			var forward:Vector3 = transformMatrix.getForwardVector();
+			//var currentRotation:Quaternion = new Quaternion(rotation.x, rotation.y, rotation.z, rotation.w);
+			//var destPosition: Vector3 = Engine.activeCamera.getPosition();
+			//var forward: Vector3 = EngineMath.vec3Sub(destPosition, position );
+
 			position.x += (forward.x * speed);
 			position.y += (forward.y * speed);
 			position.z += (forward.z * speed);
@@ -210,14 +214,16 @@
 		{
 			//look at
 
-			var destPosition: Vector3 = Engine.activeCamera.getPosition();
+			
+			//quatToEuler
+			
 
 			//get the forward vector by subtracting the destination from the current entity
 
 			var currentRotation:Quaternion = new Quaternion(rotation.x, rotation.y, rotation.z, rotation.w);
-			var forward: Vector3 = EngineMath.vec3Sub(destPosition, position);
+			var destPosition: Vector3 = Engine.activeCamera.getPosition();
+			var forward: Vector3 = EngineMath.vec3Sub(destPosition, position );
 			rotation = EngineMath.quatLookAt(forward, EngineMath.UP);
-			
 
 		}
 

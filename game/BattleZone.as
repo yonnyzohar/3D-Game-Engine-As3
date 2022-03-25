@@ -11,43 +11,22 @@
 		protected var player: Player;
 		private var tileSize:Number = 200;
 		private var map:Array = [
-			[0,1,0,1,0,1,0,1,3,1,0,1,0,1,0,1,0,1,0,1,0,0,1,0,1,0,1,0,1,0,1,0,0,1,0,1,0,1,0,1,0,3,1,3,1,1,1],
-			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3],
-			[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-			[1,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2],
-			[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-			[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-			[3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-			[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-			[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-			[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-			[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-			[0,0,0,0,4,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3],
-			[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-			[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-			[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,0,1,1,0,1,0,0,1,0]
+			[0,1,0,1,0,1,0,1,3,1,0,1,0,3,1,0,1,0,1,0,1,0,1,0,1,0,0,1,0,1,0,1,0,1,0,1,0,0,1,0,1,1,1,1],
+			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			[3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],		
+			[1,0,1,0,1,0,1,0,1,0,1,0,1,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,0,1,0]
 		];
 
 		private var initialCamPosX:Number;
@@ -57,7 +36,6 @@
 
 		override protected function initGameObjects():void
 		{
-
 			wireFrameColor = 0x00ff00;
 
 			var arr: Array = [new Img0(), new Img1(), new Img2(), new Img3(), new Img4, new Img5()];
@@ -66,22 +44,19 @@
 			{
 				for(var col:int = 0; col < map[row].length; col++)
 				{
-					var _z:Number = col * tileSize;
-					var _x:Number = row * tileSize;
+					var _z:Number = row * tileSize;
+					var _x:Number = col * tileSize;
 					var position: Point3d = new Point3d(_x, 200, _z);
 					var rotation: Quaternion = new Quaternion(0, 0, 0, 1);
 					var scale: Point3d = new Point3d(1, 1, 1);
 					if(row % 2 == 0 && col % 2 == 0)
 					{
-						var f: Plane = new Plane(position, rotation, scale, arr[0]);
-						f.setFrameColor( 0x666666);
-						gameObjects.push(f);
-						f.destructable = false;
-						f.collideable = false;
+						//var f: Plane = new Plane(position, rotation, scale, arr[0]);
+						//f.setFrameColor( 0x666666);
+						//gameObjects.push(f);
+						//f.destructable = false;
+						//f.collideable = false;
 					}
-					
-
-					
 
 					if(map[row][col] == 1)
 					{	
@@ -89,14 +64,14 @@
 						rotation = new Quaternion(0, 0, 0, 1);
 						scale = new Point3d( 1, 1, 1);
 						var p: Pyramid = new Pyramid(position, rotation, scale, arr[0]);
-						p.setFrameColor(Math.random() * 0xffffff);
+						p.setFrameColor(0xff9900);
 						gameObjects.push(p);
 						p.destructable = false;
 					}
 					if(map[row][col] == 2)
 					{
-						initialCamPosZ = col * tileSize;
-						initialCamPosX = row * tileSize;
+						initialCamPosZ = _z;
+						initialCamPosX = _x;
 						initialCamPosY = 100;
 					}
 					if(map[row][col] == 3)
@@ -153,24 +128,39 @@
 			}
 		}
 
+		private function drawRotation(rotationY:Number, startX:Number, startY:Number):void
+		{
+			
+				for(var j:int = 1; j < 10; j++)
+				{
+					//in 2d, the 0 degree faces left. in 3d the 0 degree faces towards the positive z!!
+					//so when converting we need to subtract a quarter circle
+					var newX:Number = Math.cos(rotationY - Math.PI/2) * j;
+					var newY:Number = Math.sin(rotationY - Math.PI/2) * j;
+					//newY = mapH - newY;
+					Engine.bd.setPixel(startX+newX, startY+newY, 0xff0000);
+				}
+		}
+
 
 		override public function lateUpdate():void
 		{
 			if(showStats)
 			{
-				var shrinkScale:Number = 0.01;
+				//2d works by have 0,0 at top left corner. y grows as you move down
+				//3d works by placing 0,0,0 of the world center world, and z grows as you move forward
+				//to translate this we need to inverse y, since it needs to grow as you move north, not as in 2d, 
+				//where it grows as you move south
+				var shrinkScale:Number = 0.03;
+				var mapH:Number = map[0].length * tileSize * shrinkScale;
+				var camPos:Point3d = activeCamera.getPosition();
+				var camPosX:Number = Number(camPos.x*shrinkScale);
+				var camPosY:Number = Number(camPos.z*shrinkScale);
 
-				var camPosX:Number = Number(activeCamera.getPosition().z*shrinkScale);
-				var camPosY:Number = Number(activeCamera.getPosition().x*shrinkScale);
-				
-
+				camPosY = mapH - camPosY - (mapH/2);
 				var rot:Point3d = EngineMath.quatToEuler(activeCamera.rotation);
-				for(var j:int = 1; j < 10; j++)
-				{
-					var newX:int = Math.cos(rot.y) * j;
-					var newY:int = Math.sin(rot.y) * j;
-					Engine.bd.setPixel(camPosX+newX, camPosY+newY, 0xff0000);
-				}
+				drawRotation(rot.y, camPosX, camPosY);
+				
 
 				Engine.bd.setPixel(camPosX, camPosY, 0xffff00);
 
@@ -178,23 +168,39 @@
 				for(var i:int = 0; i < gameObjects.length; i++)
 				{
 					var boundingBox:Object = gameObjects[i].boundingBox;
+					var position:Point3d = gameObjects[i].position;
 					if(boundingBox)
 					{
-						var position:Point3d = gameObjects[i].position;
+						
+
 
 
 						var minZ:Number = (position.z + boundingBox.frontBtmLeft.z)*shrinkScale;
 						var maxZ:Number = (position.z + boundingBox.backBtmLeft.z)*shrinkScale;
 
+						minZ = mapH - minZ - (mapH/2);
+						maxZ = mapH - maxZ - (mapH/2);
+
 						var minX:Number = (position.x + boundingBox.frontBtmLeft.x)*shrinkScale;
 						var maxX:Number = (position.x + boundingBox.backBtmRight.x)*shrinkScale;
 						
 
-						drawLine( new Vector3(minZ,minX,0), new Vector3(maxZ,minX,0));
-						drawLine( new Vector3(maxZ,minX,0), new Vector3(maxZ,maxX,0));
-						drawLine( new Vector3(maxZ,maxX,0), new Vector3(minZ,maxX,0));
-						drawLine( new Vector3(minZ,maxX,0), new Vector3(minZ,minX,0));
+						drawLine( new Vector3(minX,minZ,0), new Vector3(minX,maxZ,0));
+						drawLine( new Vector3(minX,maxZ,0), new Vector3(maxX,maxZ,0));
+						drawLine( new Vector3(maxX,maxZ,0), new Vector3(maxX,minZ,0));
+						drawLine( new Vector3(maxX,minZ,0), new Vector3(minX,minZ,0));
 					}
+
+					if(gameObjects[i].destructable)
+					{
+						var rot:Point3d = EngineMath.quatToEuler(gameObjects[i].rotation);
+						var entX:Number = Number(position.x*shrinkScale);
+						var entY:Number = Number(position.z*shrinkScale);
+						entY = mapH - entY - (mapH/2);
+						drawRotation(rot.y, entX, entY);
+						Engine.bd.setPixel(entX, entY, 0xffff00);
+					}
+
 					
 
 				}

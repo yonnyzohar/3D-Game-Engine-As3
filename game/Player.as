@@ -20,8 +20,9 @@
 			{
 				if(c == 0)
 				{
+					var po:Point3d = getPosition();
 					var bullet: Bullet = new Bullet(
-					new Point3d(positionMinusZ.x,positionMinusZ.y,positionMinusZ.z), 
+					new Point3d(po.x,po.y,po.z), 
 					new Quaternion(rotation.x, rotation.y, rotation.z, rotation.w), 
 					new Point3d(0.05,0.05,0.05), 
 					null);

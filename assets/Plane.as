@@ -14,7 +14,7 @@
 		
 			polygons = [
 				new Polygon(
-					new Point3d(-50   * scale.x, 0 * scale.y, 0 * scale.z, 0, 1), 
+					new Point3d(-50     * scale.x, 0 * scale.y, 0 * scale.z, 0, 1), 
 					new Point3d(50      * scale.x, 0 * scale.y, 0 * scale.z, 1, 0), 
 					new Point3d(50      * scale.x, 0 * scale.y, 100 * scale.z, 0, 0), 
 				bd),

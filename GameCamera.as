@@ -46,8 +46,9 @@
 			fovY = 2 * Math.atan(Math.tan(EngineMath.degreesToRad(fieldOfView) / 2.0) * oneDivAspectRatio);
 
 			
-			positionMinusZ = new Point3d(position.x, position.y, position.z);
+			positionMinusZ = new Point3d(position.x, position.y, position.z-zNear);
 			position.z += zNear;
+			positionMinusZ.z += zNear;
 
 		}
 	
@@ -55,7 +56,7 @@
 
 
 		public function getPosition(): Point3d {
-			return positionMinusZ;
+			return positionMinusZ;//MinusZ
 		}
 
 		public function getRotation(): Quaternion {
@@ -65,7 +66,7 @@
 		private function collidingPlus(dir:Vector3, ms:Number):Boolean
 		{
 			var isColission:Boolean = false;
-			var p:Point3d = new Point3d(position.x + (dir.x *ms), position.y + (dir.y *ms), position.z + (dir.z *ms)  );
+			var p:Point3d = new Point3d(positionMinusZ.x + (dir.x *ms), positionMinusZ.y + (dir.y *ms), positionMinusZ.z + (dir.z *ms)  );
 
 			outer : for(var i:int = 0; i < Engine.gO.length; i++)
 			{
@@ -113,6 +114,7 @@
 							isColission = go.checkColission(Engine.translate(edgeVertex, mpZ));
 							if(isColission)
 							{
+								//go.setFrameColor(Math.random() * 0xffffff);
 								break outer;
 							}
 							
@@ -131,7 +133,7 @@
 
 			var COS: Number;
 			var SIN: Number;
-			var MATH_DEG_TO_RAD: Number = 0.0174532925;
+			
 			var moveVector: Point3d;
 			var quat1: Quaternion;
 			
@@ -266,13 +268,13 @@
 			
 			if (InputHandler.up) {
 
-				moveVector = new Point3d(-rs * MATH_DEG_TO_RAD, 0, 0);
+				moveVector = new Point3d(-rs * EngineMath.MATH_DEG_TO_RAD, 0, 0);
 				quat1 = EngineMath.eulerToQuat(moveVector);
 				rotation = EngineMath.quatMul(rotation, quat1);
 			}
 
 			if (InputHandler.down) {
-				moveVector = new Point3d(rs * MATH_DEG_TO_RAD, 0, 0);
+				moveVector = new Point3d(rs * EngineMath.MATH_DEG_TO_RAD, 0, 0);
 				quat1 = EngineMath.eulerToQuat(moveVector);
 				rotation = EngineMath.quatMul(rotation, quat1);
 			}
@@ -283,7 +285,7 @@
 				//rotation.y += Engine.rotateSpeed * elapsedTime;
 
 				//var quat:Quaternion  = Engine.eulerToQuat(rotation);
-				moveVector = new Point3d(0, rs * MATH_DEG_TO_RAD, 0);
+				moveVector = new Point3d(0, rs * EngineMath.MATH_DEG_TO_RAD, 0);
 				quat1 = EngineMath.eulerToQuat(moveVector);
 				rotation = EngineMath.quatMul(rotation, quat1);
 				//rotation = Engine.quatToEuler(res);
@@ -295,7 +297,7 @@
 				//rotation.y -= Engine.rotateSpeed * elapsedTime;
 
 				//var quat:Quaternion  = Engine.eulerToQuat(rotation);
-				moveVector = new Point3d(0, -rs * MATH_DEG_TO_RAD, 0);
+				moveVector = new Point3d(0, -rs * EngineMath.MATH_DEG_TO_RAD, 0);
 				quat1 = EngineMath.eulerToQuat(moveVector);
 				rotation = EngineMath.quatMul(rotation, quat1);
 				//rotation = Engine.quatToEuler(res);
