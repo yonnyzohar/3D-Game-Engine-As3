@@ -216,6 +216,7 @@
 			//to fix this i invert the y.
 			//what the hell is going on???
 			
+			
 			//get the forward vector by subtracting the destination from the current entity
 			var currentRotation:Quaternion = new Quaternion(rotation.x, rotation.y, rotation.z, rotation.w);
 			var forward: Vector3 = EngineMath.vec3Sub(target, position );
