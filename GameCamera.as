@@ -84,12 +84,9 @@
 							{
 								break outer;
 							}
-
 						}
 					}
 				}
-				
-				
 			}
 			return isColission;
 			

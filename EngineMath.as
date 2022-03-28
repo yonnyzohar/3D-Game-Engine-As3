@@ -224,7 +224,7 @@ package {
 		}
 
 		public static function vec3Dot(_a: Vector3, _b: Vector3): Number {
-			return _a.x * _b.x + _a.y * _b.y + _a.z * _b.z;
+			return (_a.x * _b.x) + (_a.y * _b.y) + (_a.z * _b.z);
 		}
 
 		public static function vec3Cross(_a: Vector3, _b: Vector3): Vector3 {
@@ -233,6 +233,7 @@ package {
 			_result.y = (_a.z * _b.x) - (_a.x * _b.z);
 			_result.z = (_a.x * _b.y) - (_a.y * _b.x);
 			return _result;
+
 		}
 
 		public static function radToDegrees(rads: Number): Number {

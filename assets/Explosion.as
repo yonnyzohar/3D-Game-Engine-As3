@@ -19,6 +19,7 @@
 					new Point3d(Math.random() * 0.1,Math.random() * 0.1,Math.random() * 0.1), 
 					null, ( Math.random() * 100) - 50 
 				);
+				bullet.destructable = false;
 				Engine.gO.push(bullet);
 			}
 		}

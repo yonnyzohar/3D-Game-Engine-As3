@@ -11,19 +11,19 @@
 		protected var player: Player;
 		private var tileSize:Number = 200;
 		private var map:Array = [
-			[0,1,0,1,0,1,0,1,3,1,0,1,0,3,1,0,1,0,1,0,1,0,1,0,1,0,0,1,0,1,0,1,0,1,0,1,0,0,1,0,1,1,1,1],
+			[1,1,0,1,0,1,0,1,1,1,0,1,0,1,1,0,1,0,1,0,1,0,1,0,1,0,0,1,0,1,0,1,0,1,0,1,0,0,1,0,1,1,1,1],
 			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
 			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-			[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
 			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-			[3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			[3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
 			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-			[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-			[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
 			[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],		
 			[1,0,1,0,1,0,1,0,1,0,1,0,1,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,0,1,0]
@@ -88,7 +88,6 @@
 					if(map[row][col] == 4)
 					{
 						position = new Point3d(_x, 50, _z);
-
 						rotation = new Quaternion(0, 0, 0, 1);
 						scale = new Point3d(1, 1, 1);
 						var c: Cube = new Cube(position, rotation, scale, arr[0]);
@@ -147,6 +146,8 @@
 		{
 			if(showStats)
 			{
+
+				var inverse:Boolean = true;
 				//2d works by have 0,0 at top left corner. y grows as you move down
 				//3d works by placing 0,0,0 of the world center world, and z grows as you move forward
 				//to translate this we need to inverse y, since it needs to grow as you move north, not as in 2d, 
@@ -157,9 +158,10 @@
 				var camPosX:Number = Number(camPos.x*shrinkScale);
 				var camPosY:Number = Number(camPos.z*shrinkScale);
 
-				camPosY = mapH - camPosY - (mapH/2);
+				if(inverse)camPosY = mapH - camPosY - (mapH/2);
+
 				var rot:Point3d = EngineMath.quatToEuler(activeCamera.rotation);
-				drawRotation(rot.y, camPosX, camPosY);
+				drawRotation(rot.y , camPosX, camPosY);
 				
 
 				Engine.bd.setPixel(camPosX, camPosY, 0xffff00);
@@ -171,15 +173,11 @@
 					var position:Point3d = gameObjects[i].position;
 					if(boundingBox)
 					{
-						
-
-
-
 						var minZ:Number = (position.z + boundingBox.frontBtmLeft.z)*shrinkScale;
 						var maxZ:Number = (position.z + boundingBox.backBtmLeft.z)*shrinkScale;
 
-						minZ = mapH - minZ - (mapH/2);
-						maxZ = mapH - maxZ - (mapH/2);
+						if(inverse)minZ = mapH - minZ - (mapH/2);
+						if(inverse)maxZ = mapH - maxZ - (mapH/2);
 
 						var minX:Number = (position.x + boundingBox.frontBtmLeft.x)*shrinkScale;
 						var maxX:Number = (position.x + boundingBox.backBtmRight.x)*shrinkScale;
@@ -196,18 +194,12 @@
 						var rot:Point3d = EngineMath.quatToEuler(gameObjects[i].rotation);
 						var entX:Number = Number(position.x*shrinkScale);
 						var entY:Number = Number(position.z*shrinkScale);
-						entY = mapH - entY - (mapH/2);
-						drawRotation(rot.y, entX, entY);
+						if(inverse)entY = mapH - entY - (mapH/2);
+
+						drawRotation(rot.y * -1, entX, entY);
 						Engine.bd.setPixel(entX, entY, 0xffff00);
 					}
-
-					
-
 				}
-
-				
-
-			
 			}
 
 			var color:uint = 0xffff00;

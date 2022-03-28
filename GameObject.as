@@ -210,20 +210,20 @@
 			
 		}
 
-		public function lookAtCamera():void
+		public function lookAt(target:Vector3):void
 		{
-			//look at
-
+			//this is a HUGE hack here i need to sort out. the entites are looking in the mirror direction of where they need to be
+			//to fix this i invert the y.
+			//what the hell is going on???
 			
-			//quatToEuler
-			
-
 			//get the forward vector by subtracting the destination from the current entity
-
 			var currentRotation:Quaternion = new Quaternion(rotation.x, rotation.y, rotation.z, rotation.w);
-			var destPosition: Vector3 = Engine.activeCamera.getPosition();
-			var forward: Vector3 = EngineMath.vec3Sub(destPosition, position );
+			var forward: Vector3 = EngineMath.vec3Sub(target, position );
+
 			rotation = EngineMath.quatLookAt(forward, EngineMath.UP);
+			var rot:Point3d = EngineMath.quatToEuler(rotation);
+			rot.y *= -1;
+			rotation = EngineMath.eulerToQuat(rot);
 
 		}
 

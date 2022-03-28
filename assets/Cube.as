@@ -58,10 +58,21 @@ new Polygon(new Point3d(-118 * scale.x, 1.730061 * scale.y, 179.0001 * scale.z, 
 			var moveVector = new Point3d(0, rs * EngineMath.MATH_DEG_TO_RAD, 0);
 			var quat1 = EngineMath.eulerToQuat(moveVector);
 			rotation = EngineMath.quatMul(rotation, quat1);
-			*/
+			
+			//
+
+			for(var i:int = 0; i < Engine.gO.length; i++)
+			{
+				if(Engine.gO[i] is Mountain)
+				{
+					
+				}
+			}
+*/
+			lookAt(Engine.activeCamera.getPosition());
 
 			//moveForward(ms);
-			lookAtCamera();
+			
 			/*
 			var destPosition: Vector3 = Engine.activeCamera.getPosition();
 			var disToCamera:Number = Math.abs(EngineMath.getDistance(destPosition, position));
