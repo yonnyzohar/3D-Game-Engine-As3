@@ -11,6 +11,7 @@
 		public var boundingBox:Object;
 		public var destructable:Boolean = true;
 		public var _collideable:Boolean = true;
+		public var rendered:Boolean;
 		
 		public function GameObject(_c:Boolean = true) {
 			_collideable = _c;
@@ -141,6 +142,50 @@
 			};
 		}
 
+		private function getWorldTranslation(p: Point3d, _rotation: Quaternion, _position: Point3d): Point3d {
+
+			var tempPos: Point3d = new Point3d(p.x, p.y, p.z, p.u, p.v);
+			tempPos.w = p.w;
+			//rotation
+			var p: Point3d = Engine.rotate(p, _rotation);
+			p.u = tempPos.u;
+			p.v = tempPos.v;
+			p.w = tempPos.w;
+
+			// translate
+			p = Engine.translate(p, _position);
+
+
+			return p;
+		}
+
+		public function isObjectInView(camera: GameCamera): Boolean {
+
+			var worldPos:Point3d = getWorldTranslation(new Point3d(0,0,0), rotation, position);
+			var cameraPos:Point3d = new Point3d(0,0,0);
+
+			var i: int = 0;
+
+
+			// Translate
+			var cameraPos: Point3d = camera.getPosition();
+			var translateBy: Point3d = new Point3d(-cameraPos.x, -cameraPos.y, -cameraPos.z);
+			cameraPos = Engine.translate(worldPos, translateBy);
+			
+			// Rotate
+			var cameraRot: Quaternion = camera.getRotation();
+			var rotateBy: Quaternion = new Quaternion(-cameraRot.x, -cameraRot.y, -cameraRot.z, -cameraRot.w);
+			var camPos: Point3d = new Point3d(cameraPos.x, cameraPos.y, cameraPos.z, cameraPos.u, cameraPos.v);
+			cameraPos = Engine.rotate(cameraPos, rotateBy);
+	
+			if(cameraPos.z < 0)
+			{
+				return false;
+			}	
+			return true;	
+
+		}
+
 		public function checkColission(targetPos:Point3d):Boolean
 		{
 			var bb = boundingBox;
@@ -194,18 +239,41 @@
 			return p;
 		}
 
-		public function moveForward(speed:Number):void
+		public function moveForward(speed:Number, reverseY:Boolean = false):void
 		{
-			//move forwards - some bug here with object shrinking
+			//we have a super weird bug that wanting the object to face you cases a mirror effect.
+			//we thus multiply y with -1 to get it poinitng the right direction
+			//but then it does not MOVE in the right dir
+			//so we undo that, move, and then set the rotation back to the crooked var to make it rotate at us
+			if(reverseY)
+			{
+				//store bad rotation that works for some reason
+				var currentLookAtRotation:Quaternion = new Quaternion(rotation.x, rotation.y, rotation.z, rotation.w);
 			
+				//bring it back to normal by unding -1
+				var rot:Point3d = EngineMath.quatToEuler(rotation);
+				rot.y *= -1;
+				rotation = EngineMath.eulerToQuat(rot);
+				//set true matrix
+				transformMatrix.createFromTransform(position, rotation, scale);
+				//get forward vector
+			}
+			
+
+
 			var forward:Vector3 = transformMatrix.getForwardVector();
-			//var currentRotation:Quaternion = new Quaternion(rotation.x, rotation.y, rotation.z, rotation.w);
-			//var destPosition: Vector3 = Engine.activeCamera.getPosition();
-			//var forward: Vector3 = EngineMath.vec3Sub(destPosition, position );
 
 			position.x += (forward.x * speed);
 			position.y += (forward.y * speed);
 			position.z += (forward.z * speed);
+
+			if(reverseY)
+			{
+				//set back to crooked 
+				rotation = currentLookAtRotation;
+				transformMatrix.createFromTransform(position, rotation, scale);
+			}
+			
 
 			
 		}
@@ -216,15 +284,16 @@
 			//to fix this i invert the y.
 			//what the hell is going on???
 			
-			
 			//get the forward vector by subtracting the destination from the current entity
 			var currentRotation:Quaternion = new Quaternion(rotation.x, rotation.y, rotation.z, rotation.w);
 			var forward: Vector3 = EngineMath.vec3Sub(target, position );
 
 			rotation = EngineMath.quatLookAt(forward, EngineMath.UP);
+			////
 			var rot:Point3d = EngineMath.quatToEuler(rotation);
 			rot.y *= -1;
 			rotation = EngineMath.eulerToQuat(rot);
+			/////
 
 		}
 
@@ -236,12 +305,17 @@
 			var forward: Vector3 = EngineMath.vec3Sub(destPosition, position);
 
 			var rotTowardsCam:Quaternion = EngineMath.quatLookAt(forward, EngineMath.UP);
-			//for some reason we need o reverse y rotation...
 
-
-
-			rotation = Quaternion.RotateTowards(currentRotation,rotTowardsCam, 1 );
+			//This ugly hack again - for some reason we need o reverse y rotation...
+			////
+			var rot:Point3d = EngineMath.quatToEuler(rotTowardsCam);
+			rot.y *= -1;
+			rotTowardsCam = EngineMath.eulerToQuat(rot);
+			////
 			
+			rotation = Quaternion.RotateTowards(currentRotation,rotTowardsCam, 1 );
+
+
 		}
 
 		

@@ -112,16 +112,22 @@
 				var go: GameObject = gameObjects[i];
 				//this is for updating position, rotation and scale
 				go.update(elapsedTime);
+				go.rendered = false;
+				if(go.isObjectInView(activeCamera))
+				{
+					go.rendered = true;
+					//now we need to get all polygons from all game objects and sort them by average z
+					var polygons: Array = go.polygons;
+					for (var j: int = 0; j < polygons.length; j++) {
+						polygons[j].calculateWorldPos(go.rotation, go.position);
+						polygons[j].calculateCameraView(activeCamera);
+						totalPolygonsPreClip.push(polygons[j]);
+
+					}
+				}
 				
 
-				//now we need to get all polygons from all game objects and sort them by average z
-				var polygons: Array = go.polygons;
-				for (var j: int = 0; j < polygons.length; j++) {
-					polygons[j].calculateWorldPos(go.rotation, go.position);
-					polygons[j].calculateCameraView(activeCamera);
-					totalPolygonsPreClip.push(polygons[j]);
-
-				}
+				
 			}
 		
 
