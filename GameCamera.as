@@ -125,6 +125,11 @@
 			
 		}
 
+		public function getForwardVector():Vector3
+		{
+			return transformMatrix.getForwardVector();
+		}
+
 
 		public function update(elapsedTime:Number): void {
 

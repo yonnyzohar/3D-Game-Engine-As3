@@ -5,14 +5,16 @@
 	public class Bullet extends GameObject {
 
 		var dist:int = 0;
+		private var parent:GameObject;
 
-		public function Bullet(_positon: Point3d, _rotation: Quaternion, _scale: Point3d, _bd: BitmapData) {
+		public function Bullet(_positon: Point3d, _rotation: Quaternion, _scale: Point3d, _bd: BitmapData, _parent:GameObject) {
 			// constructor code
 			position = _positon; //
 			rotation = _rotation; //;
 			scale = _scale;
 			scale.x = scale.y = scale.z = 0.05;
 			bd = _bd;
+			parent = _parent;
 		
 			polygons = [
 			
@@ -47,7 +49,6 @@
 
 		override public function update(elapsedTime:Number): void {
 			
-
 			var ms:Number = Engine.moveSpeed * elapsedTime;
 			
 			dist++;
@@ -59,7 +60,7 @@
 					for(var i:int = 0; i < Engine.gO.length; i++)
 					{
 						var go:GameObject = Engine.gO[i];
-						if(go != this)
+						if(go != this && go != parent)
 						{
 							var hit:Boolean = go.checkColission(position);
 							if(hit)
@@ -70,10 +71,7 @@
 									
 									Engine.removeEntity(go);
 									new Explosion(go.position);
-
 								}
-								
-								
 							}
 						}
 					}

@@ -66,6 +66,8 @@
 
 		}
 
+
+
 		public static function removeEntity(entity:GameObject):void
 		{
 			var index:int = Engine.gO.indexOf(entity);

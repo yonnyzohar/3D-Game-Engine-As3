@@ -239,7 +239,53 @@
 			return p;
 		}
 
+		public function getInverseYRotation(_rotation:Quaternion):Quaternion
+		{
+			//bring it back to normal by unding -1
+			var rot:Point3d = EngineMath.quatToEuler(_rotation);
+			rot.y *= -1;
+			var rotQuat:Quaternion = EngineMath.eulerToQuat(rot);
+			return rotQuat;
+		}
+
 		public function moveForward(speed:Number, reverseY:Boolean = false):void
+		{
+			//we have a super weird bug that wanting the object to face you cases a mirror effect.
+			//we thus multiply y with -1 to get it poinitng the right direction
+			//but then it does not MOVE in the right dir
+			//so we undo that, move, and then set the rotation back to the crooked var to make it rotate at us
+			var currentLookAtRotation:Quaternion;
+			if(reverseY)
+			{
+				//store bad rotation that works for some reason
+				currentLookAtRotation = new Quaternion(rotation.x, rotation.y, rotation.z, rotation.w);
+				rotation = getInverseYRotation(rotation);
+				//set true matrix
+				transformMatrix.createFromTransform(position, rotation, scale);
+				//get forward vector
+			}
+			
+
+			var forward:Vector3 = transformMatrix.getForwardVector();
+
+			position.x += (forward.x * speed);
+			position.y += ((forward.y)  * speed);
+			position.z += (forward.z * speed);
+
+			if(reverseY)
+			{
+				//set back to crooked 
+				rotation = currentLookAtRotation;
+				transformMatrix.createFromTransform(position, rotation, scale);
+			}
+		}
+
+		public function getForwardVector():Vector3
+		{
+			return transformMatrix.getForwardVector();
+		}
+
+		public function moveBackWards(speed:Number, reverseY:Boolean = false):void
 		{
 			//we have a super weird bug that wanting the object to face you cases a mirror effect.
 			//we thus multiply y with -1 to get it poinitng the right direction
@@ -249,23 +295,18 @@
 			{
 				//store bad rotation that works for some reason
 				var currentLookAtRotation:Quaternion = new Quaternion(rotation.x, rotation.y, rotation.z, rotation.w);
-			
-				//bring it back to normal by unding -1
-				var rot:Point3d = EngineMath.quatToEuler(rotation);
-				rot.y *= -1;
-				rotation = EngineMath.eulerToQuat(rot);
+				rotation = getInverseYRotation(rotation);
 				//set true matrix
 				transformMatrix.createFromTransform(position, rotation, scale);
 				//get forward vector
 			}
 			
 
-
 			var forward:Vector3 = transformMatrix.getForwardVector();
 
-			position.x += (forward.x * speed);
-			position.y += (forward.y * speed);
-			position.z += (forward.z * speed);
+			position.x -= (forward.x * speed);
+			position.y -= ((forward.y)  * speed);
+			position.z -= (forward.z * speed);
 
 			if(reverseY)
 			{
@@ -290,9 +331,7 @@
 
 			rotation = EngineMath.quatLookAt(forward, EngineMath.UP);
 			////
-			var rot:Point3d = EngineMath.quatToEuler(rotation);
-			rot.y *= -1;
-			rotation = EngineMath.eulerToQuat(rot);
+			rotation = getInverseYRotation(rotation);
 			/////
 
 		}
@@ -308,9 +347,7 @@
 
 			//This ugly hack again - for some reason we need o reverse y rotation...
 			////
-			var rot:Point3d = EngineMath.quatToEuler(rotTowardsCam);
-			rot.y *= -1;
-			rotTowardsCam = EngineMath.eulerToQuat(rot);
+			rotTowardsCam = getInverseYRotation(rotTowardsCam);
 			////
 			
 			rotation = Quaternion.RotateTowards(currentRotation,rotTowardsCam, 1 );
