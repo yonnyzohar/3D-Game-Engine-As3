@@ -270,15 +270,13 @@
 			
 			if (InputHandler.up) {
 
-				moveVector = new Point3d(-rs * EngineMath.MATH_DEG_TO_RAD, 0, 0);
-				quat1 = EngineMath.eulerToQuat(moveVector);
-				rotation = EngineMath.quatMul(rotation, quat1);
+				lookDown(rs);
+				
 			}
 
 			if (InputHandler.down) {
-				moveVector = new Point3d(rs * EngineMath.MATH_DEG_TO_RAD, 0, 0);
-				quat1 = EngineMath.eulerToQuat(moveVector);
-				rotation = EngineMath.quatMul(rotation, quat1);
+				lookUp(rs);
+				
 			}
 			/**/
 
@@ -361,6 +359,25 @@
 			transformMatrix.createFromTransform(position, rotation, scale);
 
 		}
+
+		public function lookDown(rs:Number):void
+		{
+			var moveVector: Point3d;
+			var quat1: Quaternion;
+			moveVector = new Point3d(-rs * EngineMath.MATH_DEG_TO_RAD, 0, 0);
+			quat1 = EngineMath.eulerToQuat(moveVector);
+			rotation = EngineMath.quatMul(rotation, quat1);
+		}
+
+		public function lookUp(rs:Number):void
+		{
+			var moveVector: Point3d;
+			var quat1: Quaternion;
+			moveVector = new Point3d(rs * EngineMath.MATH_DEG_TO_RAD, 0, 0);
+			quat1 = EngineMath.eulerToQuat(moveVector);
+			rotation = EngineMath.quatMul(rotation, quat1);
+		}
+
 
 		public function cameraLookAt(worldPosition: Vector3): void {
 			var destPosition: Vector3 = new Vector3(worldPosition.x, worldPosition.y, worldPosition.z);

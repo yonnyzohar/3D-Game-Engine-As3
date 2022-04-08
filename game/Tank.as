@@ -35,7 +35,7 @@ new Polygon(new Point3d(-310 * scale.x, 1.730061 * scale.y, 540.0001 * scale.z, 
 
 			cnt++;
 
-			if(cnt % 10 == 0)
+			if(cnt % 100 == 0)
 			{
 				/*
 				var camRotY:Number = EngineMath.quatToEuler(Engine.activeCamera.getRotation()).y;

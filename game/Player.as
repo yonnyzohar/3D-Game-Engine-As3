@@ -12,6 +12,10 @@
 			super(_theStage, _position, _rotation);
 		}
 
+		override public function lookDown(rs:Number):void{}
+
+		override public function lookUp(rs:Number):void{}
+
 
 		override public function update(elapsedTime:Number): void 
 		{
